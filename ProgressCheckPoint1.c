@@ -874,7 +874,10 @@ void AddSundaySchedule(){
 	    PrintSundayTimeSlot(inputTimeSlot);
 	    printf(" Servers for ");
 	    PrintMonth(inputMonth);
-	    printf(" %d, %d\n", inputSunday, currentYear);
+	    printf(" %d, %d", inputSunday, currentYear);
+        printf(" at [");
+        PrintSundayTimeSlot(inputTimeSlot);
+        printf("]");
 	
 	    printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
 	    printf("\t\tInput [0] to go back to Access Sunday Schedules Menu.\n");
