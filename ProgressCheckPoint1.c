@@ -941,7 +941,10 @@ void ViewSundaySchedule(){
     for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
         printf("\t");
         PrintMonth(SundaySchedules[idxCtr01].Month);
-        printf(" %d, %d\n", SundaySchedules[idxCtr01].Date, SundaySchedules[idxCtr01].Year);
+        printf(" %d, %d ", SundaySchedules[idxCtr01].Date, SundaySchedules[idxCtr01].Year);
+        printf("at [");
+        PrintSundayTimeSlot(SundaySchedules[idxCtr01].MassNumber);
+        printf("]\n");
         printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
         printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
         printf("\t\tPrayers of the Faithful: %s\n", SundaySchedules[idxCtr01].POF);
@@ -1105,14 +1108,14 @@ void ExportSundaySchedules(){
 }
 
 void ImportSundaySchedules(){
-	idxCtr01 = 0;
+	idxCtr01 = 0;	
 	SundayScheduleDatabase = fopen("SundayScheduleDatabase.txt", "r");
 	
 	if(SundayScheduleDatabase == NULL)  fclose(SundayScheduleDatabase);
-	else{		
-    	SundaySchedules = (HolyMass *)realloc(SundaySchedules, (sundayScheduleCount + 1) * sizeof(HolyMass));
+	else{
+		SundaySchedules = (HolyMass *)realloc(SundaySchedules, (idxCtr01 + 1) * sizeof(HolyMass));
 		
-		while (fscanf(SundayScheduleDatabase, "%d, %d, %d, %d, %d, %d, %d, %d, %[^,], %[^,], %[^,], %[^,]\n", 
+		while (fscanf(SundayScheduleDatabase, "%d, %d, %d, %d, %d, %d, %d, %d, %[^,], %[^,], %[^,], %[^\n]", 
 	        &SundaySchedules[idxCtr01].Year,
 	        &SundaySchedules[idxCtr01].Month,
 	        &SundaySchedules[idxCtr01].Date,
@@ -1126,7 +1129,7 @@ void ImportSundaySchedules(){
 			SundaySchedules[idxCtr01].POF,
 			SundaySchedules[idxCtr01].Commentator) != EOF) {	        	
 				idxCtr01++;
-				SundaySchedules = (HolyMass *)realloc(SundaySchedules, (sundayScheduleCount + 1) * sizeof(HolyMass));	        	
+				SundaySchedules = (HolyMass *)realloc(SundaySchedules, (idxCtr01 + 1) * sizeof(HolyMass));	        	
     	}
 
     	sundayScheduleCount = idxCtr01;
