@@ -84,6 +84,7 @@ void CheckSundayServerInputZero(int*);
 void ExportMinistryMembers();
 void ExportSundaySchedules();
 int compareIndices(const void *a, const void *b);
+int compareSundaySchedules(const void *a, const void *b);
 
 
 // THE PROGRAM
@@ -515,9 +516,13 @@ int compareIndices(const void *a, const void *b) {
     const MinistryMember *ma = (const MinistryMember *)a;
     const MinistryMember *mb = (const MinistryMember *)b;
 
-    if (ma->Index < mb->Index) return -1;
-	else if (ma->Index > mb->Index) return 1; 
-	else return 0;
+    if ((*ma).Index < (*mb).Index) {
+        return -1;
+    } else if ((*ma).Index > (*mb).Index) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 // Shared Scheduling Functions
@@ -938,6 +943,8 @@ int isSunday(int year, int month, int day) {
 void ViewSundaySchedule(){    
     printf("\tSUNDAY SCHEDULES\n\n");
     
+    qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+    
     for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
         printf("\t");
         PrintMonth(SundaySchedules[idxCtr01].Month);
@@ -950,6 +957,26 @@ void ViewSundaySchedule(){
         printf("\t\tPrayers of the Faithful: %s\n", SundaySchedules[idxCtr01].POF);
         printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
     }
+}
+
+int compareSundaySchedules(const void *a, const void *b) {
+    const HolyMass *scheduleA = (const HolyMass *)a;
+    const HolyMass *scheduleB = (const HolyMass *)b;
+
+    if ((*scheduleA).Year != (*scheduleB).Year) {
+        return (*scheduleA).Year - (*scheduleB).Year;
+    }
+    if ((*scheduleA).Month != (*scheduleB).Month) {
+        return (*scheduleA).Month - (*scheduleB).Month;
+    }
+    if ((*scheduleA).Date != (*scheduleB).Date) {
+        return (*scheduleA).Date - (*scheduleB).Date;
+    }
+    if ((*scheduleA).MassNumber != (*scheduleB).MassNumber) {
+        return (*scheduleA).MassNumber - (*scheduleB).MassNumber;
+    }
+
+    return 0;
 }
 
 void AccessWeekdaysSchedules(){
