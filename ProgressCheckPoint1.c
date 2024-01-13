@@ -883,7 +883,7 @@ void AddSundaySchedule(){
 	
 	    // Resizes the dynamic array to store more schedule entries
 	    sundayScheduleCount++;
-	    SundayScheduleDatabase = (HolyMass *)realloc(SundayScheduleDatabase, sizeof(HolyMass) * sundayScheduleCount);
+	    SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
 	
 	    // Stores the inputs if the input is not equal to 5.
 	    areSlotsScheduled = !SundaySchedules[sundayScheduleCount].isScheduled[0] ||
