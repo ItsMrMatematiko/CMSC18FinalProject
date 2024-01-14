@@ -94,8 +94,9 @@ int main(){
     // Allocate memory for MinistryMembers struct array.
     
     MinistryMembers = (MinistryMember *)realloc(MinistryMembers, MAX * sizeof(MinistryMember));
-    ImportMinistryMembers(); // Import existing Ministry Members data.
-    ImportSundaySchedules(); // Import existing Sunday schedules. 
+	ImportMinistryMembers(); 
+	ImportSchedules(&SundaySchedules, &sundayScheduleCount, "SundayScheduleDatabase.txt"); // Import existing Ministry Members data.
+    ImportSchedules(&WeekdaySchedules, &weekdayScheduleCount, "WeekdayScheduleDatabase.txt"); // Import existing Sunday schedules. 
     ExecuteProgram(); // Execute the main program logic.
 }
 
@@ -717,7 +718,7 @@ void CheckServerInputZero(int *serverIndex){
 }
 
 void AssignServer(HolyMass *scheduleDatabase, int scheduleIndex, int year, int month, int date, int timeSlotIndex, int ministryMemberIndex, int servicePosition){    
-	if(ministryMemberIndex > 0){
+	if(ministryMemberIndex >= 0){
         switch(servicePosition){
             case 0:                
 				strcpy(scheduleDatabase[scheduleIndex].FirstReader, MinistryMembers[ministryMemberIndex].Nickname);
@@ -808,7 +809,7 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
 
     int firstServer, secondServer, thirdServer, fourthServer;
     
-    if(ministryMemberCount != 0){
+    if(ministryMemberCount > 0){
         printf("\tRedesignate All Servers for "); 
 	    PrintMonth(month);
 	    printf(" %d, %d", day, year);
@@ -837,14 +838,19 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
 }
 
 void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, int year, int month, int day, int timeSlot, int *firstServer, int *secondServer, int *thirdServer, int *fourthServer){
-    int areSlotsScheduled = 0;
+
+    time_t t;
+    struct tm* current_time;
+    time(&t);
+    current_time = localtime(&t);
     
     if(ministryMemberCount != 0){
 	    printf("\tDesignate Servers for "); 
 	    PrintMonth(month);
 	    printf(" %d, %d", day, year);
         printf(" at [");
-        PrintSundayTimeSlot(timeSlot);
+            if(!isSunday(year, month, day)) PrintWeekdayTimeSlot(timeSlot);
+            else PrintSundayTimeSlot(timeSlot);
         printf("]\n");
 	
 	    printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
@@ -852,10 +858,10 @@ void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, 
 	
 	    InputServers(firstServer, secondServer, thirdServer, fourthServer);
 
-	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *firstServer, 0);
-	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *secondServer, 1);
-	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *thirdServer, 2);
-	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *fourthServer, 3);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *firstServer - 1, 0);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *secondServer - 1, 1);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *thirdServer - 1, 2);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *fourthServer - 1, 3);
 	}
 	
 	else{
@@ -881,6 +887,24 @@ int isSunday(int year, int month, int day) {
 
     // Check if it's a Sunday
     return (dayOfWeek == 0);
+}
+
+int isMonday(int year, int month, int day) {
+    // Create a tm structure and initialize it with the given date
+    struct tm date = {0};
+    date.tm_year = year - 1900; // Years since 1900
+    date.tm_mon = month - 1;   // Months are 0-based
+    date.tm_mday = day;
+
+    // Convert the tm structure to time_t
+    time_t time = mktime(&date);
+
+    // Use localtime to get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    struct tm *localTime = localtime(&time);
+    int dayOfWeek = localTime->tm_wday;
+
+    // Check if it's a Monday
+    return (dayOfWeek == 1);
 }
 
 int compareSundaySchedules(const void *a, const void *b) {
@@ -991,7 +1015,7 @@ void AccessSundaysSchedules(){
 
     switch(selectedOption){
         case 1: AddSundaySchedule(); break;
-        case 2: ViewSundaySchedule(); break; 
+        case 2: ViewSchedule(1); break; 
         case 0: ExecuteProgram(); break;
     }  
 }
@@ -1154,35 +1178,189 @@ void AccessWeekdaysSchedules(){
     }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 0);
 
     switch(selectedOption){
-        case 1: AddSundaySchedule(); break;
-        case 2: ViewSundaySchedule(); break; 
+        case 1: AddWeekdaySchedule(); break;
+        case 2: ViewSchedule(0); break; 
         case 0: ExecuteProgram(); break;
     }  
 }
 
-// Viewing Schedule Functions
-void ViewSundaySchedule(){        
-    PrintAppHeader();
-    printf("\tEXISTING SUNDAY SCHEDULES\n\n");
-    
-    qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
-    
-    for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
-        printf("\t");
-        PrintMonth(SundaySchedules[idxCtr01].Month);
-        printf(" %d, %d ", SundaySchedules[idxCtr01].Date, SundaySchedules[idxCtr01].Year);
-        printf("at [");
-        PrintSundayTimeSlot(SundaySchedules[idxCtr01].MassNumber);
-        printf("]\n");
-        printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
-        printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
-        printf("\t\tPrayers of the Faithful: %s\n", SundaySchedules[idxCtr01].POF);
-        printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
-    }
+void PrintWeekdayTimeSlot(int timeSlotCode){    
+    switch(timeSlotCode){
+        case 1: printf("06:00 AM"); break;
+        case 2: printf("05:15 PM"); break;
+    }    
 }
 
-void ViewWeekdaySchedule(){
+void AddWeekdaySchedule(){
+    int inputMonth, inputWeekday, inputTimeSlot, toAssign = 0, scheduleEntryMatch;
+    int serverOne, serverTwo, serverThree, serverFour;
+    
+    // The next 5 lines of a code block are preliminary codes for the program access the current time.
+    time_t t;
+    struct tm* current_time;
+    time(&t);
+    current_time = localtime(&t);
+    int currentYear = current_time->tm_year + 1900;
+    
+    PrintAppHeader();
+    printf("\tWEEKDAY SERVICE SCHEDULING\n");
+    printf("-----------------------------------------------------------------------------------------------\n");
 
+    // This code block will ask the user to select a month that would be scheduled.
+    // Only the months in year 2024 will be scheduled.
+    inputMonth = GetSelectedMonth();
+    
+    if(inputMonth == 0){
+        system("cls");
+        AccessSundaysSchedules();
+        ExitProgram(0);
+    }
+    
+    // This line will call the function to print a calendar that can be viewed by the user.
+    PrintCalendar(inputMonth, currentYear);
+
+    // This do-while loop will ask the user to select a day that would be given a schedule.
+    // This loop will handle errors concerning the date inputs: be it a past date, an invalid date, or a non-Sunday date.
+    do{
+        inputWeekday = GetSelectedDate(inputMonth);
+
+        if(inputWeekday == 0){
+            system("cls");
+            AccessSundaysSchedules();
+            ExitProgram(0);
+        }
+
+        else if(isSunday(currentYear, inputMonth, inputWeekday)){
+            printf("\t\tYou entered a date that falls on a Sunday. Please try again.\n\n");
+        }
+    }while(isSunday(currentYear, inputMonth, inputWeekday));
+
+    printf("\n-----------------------------------------------------------------------------------------------\n\n");
+
+    if(!isMonday(currentYear, inputMonth, inputWeekday)){
+        printf("\tPlease select a time slot for the Service Scheduling\n");
+        printf("\t\t[1] 06:00 AM \t\t[2] 05:15 PM\n\n");
+
+        // This do-while loop will ask the user to select a time slot for a specific Sunday and check if it is a valid input.
+        do{
+            printf("\tSelected Time Slot: ");
+            scanf(" %d", &inputTimeSlot);
+            ClearInputBuffer();
+
+            if(inputTimeSlot < 0 || inputTimeSlot > 2){
+                printf("\t\t\tYou provided an invalid input. Please try again.\n");
+            }		
+
+            else if(inputTimeSlot == 0){
+                system("cls");
+                AccessSundaysSchedules();
+                ExitProgram(0);
+            }
+        }while(inputTimeSlot < 0 || inputTimeSlot > 2);
+    }
+
+    else{        
+        inputTimeSlot = 1;
+        printf("\tMondays only have one Mass schedule. The time slot is automatically recorded at ");
+        PrintWeekdayTimeSlot(inputTimeSlot);
+        printf("\n");
+    }
+    
+    printf("\n-----------------------------------------------------------------------------------------------\n\n");
+
+    // This line will call the function that would print the index of the existing members alongside their nicknames.
+    PrintMembersWithNumberAndNickname();
+
+    printf("\n-----------------------------------------------------------------------------------------------\n");
+
+    // This code block (up until the end of this function) will check for the existing schedules in the SundaySchedules dynamic array.
+    // If there is an existing schedule, then it will be open for modifications.
+    // If there are no existing schedules, then it will be created and assigned accordingly. 
+    scheduleEntryMatch = 0;
+
+    for(idxCtr01 = 0; idxCtr01 < weekdayScheduleCount; idxCtr01++){
+        // This value assignment will check for an exact match of an existing schedule in the SundaySchedules dynamic array.
+        scheduleEntryMatch = WeekdaySchedules[idxCtr01].Year == currentYear &&
+                             WeekdaySchedules[idxCtr01].Month == inputMonth &&
+                             WeekdaySchedules[idxCtr01].Date == inputWeekday &&
+                             WeekdaySchedules[idxCtr01].MassNumber == inputTimeSlot;
+
+        // This if condition checks if there is both an existing schedule in the record and a schedule assignment for the said schedule.
+        // This code block shall cater to both assigned and marked as 'NONE' positions, provided that not all date entries
+        // would exist prior to running this program.
+        if(scheduleEntryMatch){
+            // This code block will print the  date and time slot of the existing schedule
+            printf("\n\tCurrent Servers for ");
+            PrintMonth(inputMonth);
+            printf(" %d, %d at [", inputWeekday, currentYear);
+            PrintWeekdayTimeSlot(inputTimeSlot);
+            printf("]\n");
+
+            // This code block will print the names of those assigned in a specific service schedule position.
+            printf("\t\tFirst Reader: %s\n", WeekdaySchedules[idxCtr01].FirstReader);
+            printf("\t\tSecond Reader: %s\n", WeekdaySchedules[idxCtr01].SecondReader);
+            printf("\t\tPrayers of the Faithful (POF): %s\n", WeekdaySchedules[idxCtr01].POF);
+            printf("\t\tCommentator: %s\n\n", WeekdaySchedules[idxCtr01].Commentator);
+            printf("-----------------------------------------------------------------------------------------------\n");
+
+            // This code line will call the function that allows the user to redesignate the schedules of the servers.
+            RedesignateServers(WeekdaySchedules, idxCtr01);
+            break;
+        }
+    }
+
+    // Should the schedule date not yet exist in the SundaySchedules dynamic array, then this condition will be performed.
+    if(!scheduleEntryMatch){
+        // This line increments the number of schedules stored in the SundaySchedules dynamic array.
+        weekdayScheduleCount++; 
+        
+        // This line will reallocate memory to cater the new entry to be encoded to the SundaySchedules dynamic array.
+	    WeekdaySchedules = (HolyMass *)realloc(WeekdaySchedules, sizeof(HolyMass) * weekdayScheduleCount);
+
+        // This code line will call the function that allows the user to add new server schedules into the SundaySchedules dynamic array.
+        DesignateNewServers(WeekdaySchedules, weekdayScheduleCount - 1, currentYear, inputMonth, inputWeekday, inputTimeSlot, &serverOne, &serverTwo, &serverThree, &serverFour);
+    }   
+}
+
+// Viewing Schedule Functions
+void ViewSchedule(int isASunday){
+    HolyMass *tempDatabase = NULL;
+    int tempScheduleCount;
+
+    PrintAppHeader();
+
+    if(isASunday){
+        printf("\tEXISTING SUNDAY SCHEDULES\n\n");            
+        qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+        
+        tempScheduleCount = sundayScheduleCount;
+        tempDatabase = (HolyMass *)realloc(tempDatabase, tempScheduleCount * sizeof(HolyMass));
+        tempDatabase = SundaySchedules;        
+    }
+
+    else{
+        printf("\tEXISTING WEEKDAY SCHEDULES\n\n");        
+        qsort(WeekdaySchedules, weekdayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+        
+        tempScheduleCount = weekdayScheduleCount;
+        tempDatabase = (HolyMass *)realloc(tempDatabase, tempScheduleCount * sizeof(HolyMass));
+        tempDatabase = WeekdaySchedules;        
+    }
+
+    for(idxCtr01 = 0; idxCtr01 < tempScheduleCount; idxCtr01++){
+        printf("\t");
+        PrintMonth(tempDatabase[idxCtr01].Month);
+        printf(" %d, %d ", tempDatabase[idxCtr01].Date, tempDatabase[idxCtr01].Year);
+        printf("at [");
+            if(isSunday(tempDatabase[idxCtr01].Year, tempDatabase[idxCtr01].Month, tempDatabase[idxCtr01].Date))
+                PrintSundayTimeSlot(tempDatabase[idxCtr01].MassNumber);
+            else    PrintWeekdayTimeSlot(tempDatabase[idxCtr01].MassNumber);
+        printf("]\n");
+        printf("\t\tFirst Reader: %s\n", tempDatabase[idxCtr01].FirstReader);
+        printf("\t\tSecond Reader: %s\n", tempDatabase[idxCtr01].SecondReader);
+        printf("\t\tPrayers of the Faithful: %s\n", tempDatabase[idxCtr01].POF);
+        printf("\t\tCommentator: %s\n\n", tempDatabase[idxCtr01].Commentator);
+    }
 }
 
 // File Handling Functions
@@ -1230,55 +1408,60 @@ void ImportMinistryMembers(){
 	}   
 }
 
-void ExportSundaySchedules(){
-	SundayScheduleDatabase = fopen("SundayScheduleDatabase.txt", "w");
-	
-	for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].Year);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].Month);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].Date);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].MassNumber);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].isScheduled[0]);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].isScheduled[1]);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].isScheduled[2]);
-        fprintf(SundayScheduleDatabase, "%d, ", SundaySchedules[idxCtr01].isScheduled[3]);
-        fprintf(SundayScheduleDatabase, "%s, ", SundaySchedules[idxCtr01].FirstReader);
-        fprintf(SundayScheduleDatabase, "%s, ", SundaySchedules[idxCtr01].SecondReader);        
-        fprintf(SundayScheduleDatabase, "%s, ", SundaySchedules[idxCtr01].POF);        
-        fprintf(SundayScheduleDatabase, "%s\n", SundaySchedules[idxCtr01].Commentator);
+void ExportSchedules(HolyMass *scheduleDatabase, int *scheduleCount, int isSunday){
+    FILE *file;
+    char *filename;
+
+    if (isSunday) filename = "SundayScheduleDatabase.txt";
+    else filename = "WeekdayScheduleDatabase.txt";
+
+    file = fopen(filename, "w");
+
+    for (idxCtr01 = 0; idxCtr01 < *scheduleCount; idxCtr01++) {
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].Year);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].Month);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].Date);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].MassNumber);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].isScheduled[0]);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].isScheduled[1]);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].isScheduled[2]);
+        fprintf(file, "%d, ", scheduleDatabase[idxCtr01].isScheduled[3]);
+        fprintf(file, "%s, ", scheduleDatabase[idxCtr01].FirstReader);
+        fprintf(file, "%s, ", scheduleDatabase[idxCtr01].SecondReader);
+        fprintf(file, "%s, ", scheduleDatabase[idxCtr01].POF);
+        fprintf(file, "%s\n", scheduleDatabase[idxCtr01].Commentator);
     }
-    
-    fclose(SundayScheduleDatabase);
+
+    fclose(file);
 }
 
-void ImportSundaySchedules(){
-	idxCtr01 = 0;	
-	SundayScheduleDatabase = fopen("SundayScheduleDatabase.txt", "r");
-	
-	if(SundayScheduleDatabase == NULL)  fclose(SundayScheduleDatabase);
-	else{
-		SundaySchedules = (HolyMass *)realloc(SundaySchedules, (idxCtr01 + 1) * sizeof(HolyMass));
-		
-		while (fscanf(SundayScheduleDatabase, "%d, %d, %d, %d, %d, %d, %d, %d, %[^,], %[^,], %[^,], %[^\n]", 
-	        &SundaySchedules[idxCtr01].Year,
-	        &SundaySchedules[idxCtr01].Month,
-	        &SundaySchedules[idxCtr01].Date,
-	        &SundaySchedules[idxCtr01].MassNumber,
-	        &SundaySchedules[idxCtr01].isScheduled[0],
-	        &SundaySchedules[idxCtr01].isScheduled[1],
-	        &SundaySchedules[idxCtr01].isScheduled[2],
-	        &SundaySchedules[idxCtr01].isScheduled[3],
-	        SundaySchedules[idxCtr01].FirstReader,
-			SundaySchedules[idxCtr01].SecondReader,
-			SundaySchedules[idxCtr01].POF,
-			SundaySchedules[idxCtr01].Commentator) != EOF) {	        	
-				idxCtr01++;
-				SundaySchedules = (HolyMass *)realloc(SundaySchedules, (idxCtr01 + 1) * sizeof(HolyMass));	        	
-    	}
+void ImportSchedules(HolyMass **scheduleDatabase, int *scheduleCount, char *filename){
+    int idxCtr01 = 0;
+    FILE *file = fopen(filename, "r");
 
-    	sundayScheduleCount = idxCtr01;
-    	fclose(SundayScheduleDatabase);
-	}	
+    if (file == NULL) return;
+
+    *scheduleDatabase = (HolyMass *)realloc(*scheduleDatabase, (idxCtr01 + 1) * sizeof(HolyMass));
+
+    while (fscanf(file, "%d, %d, %d, %d, %d, %d, %d, %d, %[^,], %[^,], %[^,], %[^\n]",
+                  &(*scheduleDatabase)[idxCtr01].Year,
+                  &(*scheduleDatabase)[idxCtr01].Month,
+                  &(*scheduleDatabase)[idxCtr01].Date,
+                  &(*scheduleDatabase)[idxCtr01].MassNumber,
+                  &(*scheduleDatabase)[idxCtr01].isScheduled[0],
+                  &(*scheduleDatabase)[idxCtr01].isScheduled[1],
+                  &(*scheduleDatabase)[idxCtr01].isScheduled[2],
+                  &(*scheduleDatabase)[idxCtr01].isScheduled[3],
+                  (*scheduleDatabase)[idxCtr01].FirstReader,
+                  (*scheduleDatabase)[idxCtr01].SecondReader,
+                  (*scheduleDatabase)[idxCtr01].POF,
+                  (*scheduleDatabase)[idxCtr01].Commentator) != EOF) {
+        idxCtr01++;
+        (*scheduleDatabase) = (HolyMass *)realloc((*scheduleDatabase), (idxCtr01 + 1) * sizeof(HolyMass));
+    }
+
+    *scheduleCount = idxCtr01;
+    fclose(file);
 }
 
 // Miscellaneous Functions
@@ -1290,6 +1473,7 @@ void ClearInputBuffer(){
 void ExitProgram(int errorCode){
 	BubbleSort();
     ExportMinistryMembers();
-    ExportSundaySchedules();
+    ExportSchedules(SundaySchedules, &sundayScheduleCount, 1);
+    ExportSchedules(WeekdaySchedules, &weekdayScheduleCount, 0);
 	exit(0);
 }
