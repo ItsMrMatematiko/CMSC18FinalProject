@@ -56,7 +56,7 @@ char temp, toContinue;
 void PrintAppHeader();
 void ClearInputBuffer();
 void ExecuteProgram();
-char MainMenu();
+int MainMenu();
 void AccessMinistryMembers();
 void DeleteMinistryMember();
 void AccessWeekdaysSchedules();
@@ -89,14 +89,17 @@ void CheckServerInputZero();
 void PrintSundayTimeSlot();
 
 
-// THE PROGRAM
+// THE MAIN PROGRAM
 int main(){
+    // Allocate memory for MinistryMembers struct array.
+    
     MinistryMembers = (MinistryMember *)realloc(MinistryMembers, MAX * sizeof(MinistryMember));
-	ImportMinistryMembers(); 
-	ImportSundaySchedules();      
-    ExecuteProgram();
+    ImportMinistryMembers(); // Import existing Ministry Members data.
+    ImportSundaySchedules(); // Import existing Sunday schedules. 
+    ExecuteProgram(); // Execute the main program logic.
 }
 
+// Function to print out the main header of the program.
 void PrintAppHeader(){
     system("cls");
     printf("===============================================================================================\n");
@@ -107,88 +110,98 @@ void PrintAppHeader(){
     printf("===============================================================================================\n");
 }
 
+// Function to execute the main program logic.
 void ExecuteProgram(){	
-    if (ministryMemberCount > 0) BubbleSort();    
+    if (ministryMemberCount > 0) BubbleSort(); // Sort MinistryMembers if there are members.    
     PrintAppHeader();
 
-    char choiceOfAction = MainMenu();
+    int choiceOfAction = MainMenu(); // Display and get user input from the main menu.
 
+    // Execute the selected action based on user input.
     switch(choiceOfAction){
-        case '1': AccessMinistryMembers(); break;
-        case '2': AccessWeekdaysSchedules(); break;            
-        case '3': AccessSundaysSchedules(); break;            
-        case '=': ExitProgram(0); break;
+        case 1 : AccessMinistryMembers(); break;
+        case 2 : AccessWeekdaysSchedules(); break;            
+        case 3 : AccessSundaysSchedules(); break;            
+        case 0 : ExitProgram(0); break;
     }
 
+    // Check if the user wants to perform other actions.
     printf("\tDo you wish to perform other actions in this program?.\n");
-	printf("\t\t[Y] or [y] for YES\n"); 
-	printf("\t\tAny character for NO\n"); 
-	printf("\n\t\tUser Input: ");
-	scanf(" %c", &toContinue);
-	PrintAppHeader();
-	ClearInputBuffer();	
-	printf("==========================================================================================================\n");
-	
-	if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); }
-	else ExitProgram(0);
+    printf("\t\t[Y] or [y] for YES\n"); 
+    printf("\t\tAny character for NO\n"); 
+    printf("\n\t\tUser Input: ");
+    scanf(" %c", &toContinue);
+    PrintAppHeader();
+    ClearInputBuffer();	
+    printf("==========================================================================================================\n");
+
+    // If the user wants to continue, clear the screen and execute the program again.
+    if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); }
+    else ExitProgram(0);
 }
 
-char MainMenu(){    
-    char selectedOption;
+// This function holds the main menu of the program.
+// Serves as the main selection function to access different functions.
+int MainMenu(){    
+    int selectedOption;
 
     printf("\n\tPROGRAM OPTIONS\n\n");
     printf("\t\t[1] Access Ministry Members\n");
     printf("\t\t[2] Access Weekdays Scheduled Servers\n");
     printf("\t\t[3] Access Sundays Scheduled Servers\n");
-    printf("\t\t[=] Exit the Program\n\n");
+    printf("\t\t[0] Exit the Program\n\n");
         
     do{
         printf("\tWhich of the following actions would you like to do? ");
-        scanf(" %c", &selectedOption);
+        scanf(" %d", &selectedOption);
         ClearInputBuffer();          
 
-        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '3' && selectedOption != '='){
+        if(selectedOption != 1 && selectedOption != 2 && selectedOption != 3 && selectedOption != 0){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }        
-    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '3' && selectedOption != '=');   
+    }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 3 && selectedOption != 0);   
         
     return selectedOption;
 }
 
-// Record Ministry Members
+// Function to record Ministry Members.
+// Main menu for Ministry Member data manipulation.
 void AccessMinistryMembers(){
     PrintAppHeader();
+    
+	// Do while loop to ask choice of user and makes sure that only the given choices are inputted.
     do {
         printf("\n\tPROGRAM OPTIONS\n\n");
         printf("\t\t[1] Add New Records\n");
         printf("\t\t[2] View All Existing Records\n");
         printf("\t\t[3] Delete a Member\n");
-        printf("\t\t[=] Go Back to Main Menu\n\n");
+        printf("\t\t[0] Go Back to Main Menu\n\n");
         
         printf("\tEnter Choice here: ");
-        scanf(" %c", &choice);
+        scanf(" %d", &choice);
         ClearInputBuffer();  
             
-        if(choice != '1' && choice != '2' && choice != '3' && choice != '='){
+        if(choice != 1 && choice != 2 && choice != 3 && choice != 0){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }   
-    } while (choice != '1' && choice != '2' && choice != '3' && choice != '=');
+    } while (choice != 1 && choice != 2 && choice != 3 && choice != 0);
 
+	// Switch case function to analyze user input and execute different functions.
     switch(choice){
-        case '1':
+        case 1:
             AddRecord();
             BubbleSort();
             break;
 
-        case '2':
+        case 2:
             DisplayAll();
             break;
 
-        case '3':
+        case 3:
             DeleteMinistryMember();
             break;
 
-        case '=':
+        case 0:
             ExecuteProgram();
             ExitProgram(0);
             break;
@@ -198,40 +211,44 @@ void AccessMinistryMembers(){
     } 
 }
 
+// Function for adding Ministry Member data into database.
 void AddRecord(){
 	char tempSurname[21], tempFirstName[31], tempMiddleName[16], tempNickname[16], tempSex;
 	int tempYear, tempMonth, tempDay, nicknameExists = 0, daysInMonth;
 	
+	// If function to make sure ministry member input does not exceed max storage capacity of MinistryMembers struct.
     if (ministryMemberCount < MAX)
     {
     	PrintAppHeader();
         printf("\n\t-----------------------------------------------------------------");
         printf("\n\n");
-        printf("\tIf you wish to return to the Program options please enter [0]\n\n");
+        printf("\tIf you wish to return to the previous section please enter: [9]\n");
+        printf("\tIf you wish to return to the Main Menu please enter: [0]\n\n");
             
-        printf("\tEnter Member's Surname: ");
+        printf("\tEnter Member's Surname: "); // User input for member surname.
         scanf(" %[^\n]s", &tempSurname);
-        CheckNewRecordEqualsSignChar(tempSurname);
+        CheckNewRecordEqualsSignChar(tempSurname); 
         ClearInputBuffer();  
 		
-        printf("\tEnter Member's First Name: ");
+        printf("\tEnter Member's First Name: "); // User input for member first name.
         scanf(" %[^\n]s", &tempFirstName);
-        CheckNewRecordEqualsSignChar(tempFirstName);
+        CheckNewRecordEqualsSignChar(tempFirstName);  
         ClearInputBuffer();  
 		    
-        printf("\tEnter Member's Middle Name: ");
+        printf("\tEnter Member's Middle Name: "); // User input for member middle name.
         scanf(" %[^\n]s", &tempMiddleName);
-        CheckNewRecordEqualsSignChar(tempMiddleName);
+        CheckNewRecordEqualsSignChar(tempMiddleName);  
         ClearInputBuffer();  
         
         do {
         	nicknameExists = 0;
         	
-            printf("\tEnter Member's Nickname: ");
+            printf("\tEnter Member's Nickname: "); // User input for member nick name.
             scanf(" %[^\n]s", &tempNickname);
-            CheckNewRecordEqualsSignChar(tempNickname);
+            CheckNewRecordEqualsSignChar(tempNickname);  
             ClearInputBuffer();
-
+			
+			// For loop to make sure that nickname input does not yet exist.
             for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01++) {
                 if (strcasecmp(tempNickname, MinistryMembers[idxCtr01].Nickname) == 0) {
                     nicknameExists = 1;
@@ -243,23 +260,25 @@ void AddRecord(){
                 break;
             }
         } while (nicknameExists = 1);
-            
+        
+		// Do-while loop to make sure that user input is only equal to m, M, f, or F.    
         do {    
-            printf("\tSex (M or F): ");
+            printf("\tSex (M or F): "); // User input for member sex.
             scanf(" %c", &tempSex);
             
             if (toupper(tempSex) != 'M' && toupper(tempSex) != 'F') {
                 printf("\t\tInvalid input, please choose between M or F.\n");
             }
 
-            tempSex = toupper(tempSex);
+            tempSex = toupper(tempSex); // Function to make sure that sex input is capitalized.
 
-            CheckNewRecordEqualsSignChar2(tempSex);
+            CheckNewRecordEqualsSignChar2(tempSex); 
             ClearInputBuffer();
     	} while (tempSex != 'M' && tempSex != 'F');  
         
+        // Do while loop to ensure proper timeline of church
 		do {    
-            printf("\tEnter year of Membership: ");
+            printf("\tEnter year of Membership: "); // User input for member's year of membership
             scanf("%d", &tempYear);
             CheckNewRecordEqualsSignInt(tempYear);
                 
@@ -272,9 +291,10 @@ void AddRecord(){
             else 
                 break;
         } while (tempYear < 1952 || tempYear > 2024);
-            
+        
+		// Do while loop to ensure user input is along the range of months in a year.    
         do {
-            printf("\tEnter Month of Membership (1-12): ");
+            printf("\tEnter Month of Membership (1-12): ");  // User input for member's month of membership
             scanf("%d", &tempMonth);
             CheckNewRecordEqualsSignInt(tempMonth);
             ClearInputBuffer();  
@@ -285,13 +305,15 @@ void AddRecord(){
                 break;
 
         } while (1 > tempMonth || 12 < tempMonth);
-            
+        
+		// Do while loop to ensure user input for day corresponds with the year and month previously inputted.
         do {
     		printf("\tEnter day of Membership: ");
     		scanf("%d", &tempDay);
-    		CheckNewRecordEqualsSignInt(tempDay);
+    		CheckNewRecordEqualsSignInt(tempDay); 
     		ClearInputBuffer();
-
+			
+			// Calls to function CheckForDaysInAMonth
     		daysInMonth = CheckForDaysInAMonth(tempMonth, tempYear);
 
     		if (tempDay < 1 || tempDay > daysInMonth)
@@ -301,6 +323,7 @@ void AddRecord(){
         	    break;
         } while (tempDay < 1 || tempDay > daysInMonth);
 
+		// Reassigns variables to MinistryMembers instances according to current count.
 		MinistryMembers[ministryMemberCount].Index = ministryMemberCount;
 		strcpy(MinistryMembers[ministryMemberCount].Surname, tempSurname);
 		strcpy(MinistryMembers[ministryMemberCount].FirstName, tempFirstName);
@@ -310,7 +333,7 @@ void AddRecord(){
 		MinistryMembers[ministryMemberCount].YearMembership = tempYear;
 		MinistryMembers[ministryMemberCount].MonthMembership = tempMonth;
 		MinistryMembers[ministryMemberCount].DayMembership = tempDay;
-        ministryMemberCount++;
+        ministryMemberCount++; // Increments total count for ministry members.
             
         }
         else    
@@ -322,61 +345,87 @@ void AddRecord(){
 
 }
 
+// Function for erasing Ministry Member in database.
 void DeleteMinistryMember(){
     int DeletedMember;
     PrintAppHeader();
-    DisplayAll();
+    DisplayAll(); // Calls to function DisplayAll to display all curent members in database.
 
-    printf("\n\tEnter the number of the member you want to delete (0 to cancel): ");
+    printf("\n\tEnter the number of the member you want to delete (0 to cancel): "); 
     scanf("%d", &DeletedMember);
     ClearInputBuffer();
-
+	
+	// Check if the entered member number is within valid range
     if (DeletedMember >= 1 && DeletedMember <= ministryMemberCount) {
+    	
+    	// Loop to shift array elements to fill the gap left by the deleted member
         for (idxCtr01 = DeletedMember - 1; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
             MinistryMembers[idxCtr01] = MinistryMembers[idxCtr01 + 1];
-            MinistryMembers[idxCtr01].Index = idxCtr01 + 1; 
+            MinistryMembers[idxCtr01].Index = idxCtr01 + 1; // Update the index of the moved member
         }
 
-        ministryMemberCount--;
+        ministryMemberCount--; // Reduce the count of members after deletion
         printf("\n\tMember deleted successfully.\n");
     } else if (DeletedMember != 0) {
+    	// If the entered member number is not in the valid range
         printf("\n\tInvalid member number. No changes made.\n");
     }
 
     printf("\n\t-----------------------------------------------------------------\n\n");
 }
 
+ // Checks user input for 9 or 0 to either return to previous section or return to Main Menu (string variables).
 void CheckNewRecordEqualsSignChar(char* temp){
 	 if (strcmp(temp, "0") == 0) {
-                AccessMinistryMembers();
+                ExecuteProgram();
+            	ExitProgram(0);
+		}
+	else if (strcmp(temp, "9") == 0) {
+				AccessMinistryMembers();
                 ExitProgram(0);
-}
+	}
 }
 
+// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (integer variables).
 void CheckNewRecordEqualsSignInt(int temp){
 	 if (temp == 0) 
 	 {
-                AccessMinistryMembers();
+                ExecuteProgram();
                 ExitProgram(0);
 }
+	if (temp == 9)
+	{
+		AccessMinistryMembers();
+                ExitProgram(0);
+	}
 }
 
+// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (character variables).
 void CheckNewRecordEqualsSignChar2(char temp){
     if (temp == '0') {
+        ExecuteProgram();
+        ExitProgram(0);
+    }
+    if (temp == '9') {
         AccessMinistryMembers();
         ExitProgram(0);
     }
 }
 
+// BubbleSort function to sort MinistryMembers array based on Surname
 void BubbleSort() {
+    // Outer loop for multiple passes through the array
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
+        // Inner loop for comparing and swapping elements
         for (idxCtr02 = idxCtr01 + 1; idxCtr02 < ministryMemberCount; idxCtr02++) {
+            // Compare surnames (case-insensitive) using strcmp and strupr
             if (strcmp(strupr(MinistryMembers[idxCtr01].Surname), strupr(MinistryMembers[idxCtr02].Surname)) > 0) {
-                //swap
+                // Swap MinistryMembers[idxCtr01] and MinistryMembers[idxCtr02]
                 MinistryMember temp = MinistryMembers[idxCtr01];
                 MinistryMembers[idxCtr01] = MinistryMembers[idxCtr02];
                 MinistryMembers[idxCtr02] = temp;
                 
+                // Swap the index values as well to maintain correct order
                 int tempIndex = MinistryMembers[idxCtr01].Index;
                 MinistryMembers[idxCtr01].Index = MinistryMembers[idxCtr02].Index;
                 MinistryMembers[idxCtr02].Index = tempIndex;
@@ -385,15 +434,20 @@ void BubbleSort() {
     }
 }
 
+// Function to sort Ministry Members by their membership year in descending order.
 void YearSort(){
+    // Outer loop to iterate through each member in the MinistryMembers array.
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
+        // Inner loop to compare the current member with the subsequent members.
         for (idxCtr02 = idxCtr01 + 1; idxCtr02 < ministryMemberCount; idxCtr02++) {
+            // Check if the membership year of the current member is less than the next member.
             if (MinistryMembers[idxCtr01].YearMembership < MinistryMembers[idxCtr02].YearMembership) {
-                //swap
+                // Swap the positions of the current member and the next member.
                 MinistryMember temp = MinistryMembers[idxCtr01];
                 MinistryMembers[idxCtr01] = MinistryMembers[idxCtr02];
                 MinistryMembers[idxCtr02] = temp;
                 
+                // Swap the index values of the members for correct indexing after sorting.
                 int tempIndex = MinistryMembers[idxCtr01].Index;
                 MinistryMembers[idxCtr01].Index = MinistryMembers[idxCtr02].Index;
                 MinistryMembers[idxCtr02].Index = tempIndex;
@@ -402,42 +456,51 @@ void YearSort(){
     }
 }
 
+// Void function to sort Ministry Members by gender.
 void GenderSort(){
 	PrintAppHeader();
 	do{
     printf("\n\tSort by Gender:\n");
     printf("\t\t[1] Male first\n");
     printf("\t\t[2] Female first\n");
-    printf("\t\t[0] Return to previous section\n");
+    printf("\t\t[9] Return to previous section\n");
+    printf("\t\t[0] Return to Main Menu\n\n");
 
     printf("\tEnter your choice: ");
     scanf("%d", &genderoption);
     ClearInputBuffer(); 
     
     if (genderoption == 0){
+		ExecuteProgram();
+		ExitProgram(0);
+	}
+	else if (genderoption == 9){
 		DisplayAll();
 	}
 	
-    if (genderoption != 2 && genderoption != 1 && genderoption != 0){
+    if (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=9){
     	printf("\t\t\t Invalid input. Please try again");
 	}
-    }while (genderoption != 2 && genderoption != 1 && genderoption != 0);
+    }while (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=9);
      
         
     BubbleSortGender(genderoption);
 }
 
+// Function to perform bubble sort based on gender option.
 void BubbleSortGender(int genderoption) {
-	
+    // Iterate through each member using two nested loops.
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
         for (idxCtr02 = idxCtr01 + 1; idxCtr02 < ministryMemberCount; idxCtr02++) {
+            // Check the gender option and conditions for swapping.
             if ((genderoption == 1 && MinistryMembers[idxCtr01].Sex == 'F' && MinistryMembers[idxCtr02].Sex != 'F') ||
                 (genderoption == 2 && MinistryMembers[idxCtr01].Sex == 'M' && MinistryMembers[idxCtr02].Sex == 'F')) {
-                // Swap
+                // Swap positions of the current member and the next member.
                 struct MinistryMember temp = MinistryMembers[idxCtr01];
                 MinistryMembers[idxCtr01] = MinistryMembers[idxCtr02];
                 MinistryMembers[idxCtr02] = temp;
                 
+                // Swap the index values of the members for correct indexing after sorting.
                 int tempIndex = MinistryMembers[idxCtr01].Index;
                 MinistryMembers[idxCtr01].Index = MinistryMembers[idxCtr02].Index;
                 MinistryMembers[idxCtr02].Index = tempIndex;
@@ -446,59 +509,72 @@ void BubbleSortGender(int genderoption) {
     }
 }
 
-void DisplayAll()	{        
+
+// Function to display all ministry members based on user's choice of sorting.
+void DisplayAll() {
     char monthName[10];
-        
-    PrintAppHeader();
     
+    PrintAppHeader();
+
+    // Loop to get the user's choice for sorting.
     do {
         printf("\n\tHow do you wish to view the record?\n\n");
         printf("\t\t[1] Default (Ascending Alphabetical Order)\n");
         printf("\t\t[2] Year Sort (Recent Members)\n");
         printf("\t\t[3] Gender Sort\n");
-        printf("\t\t[0] Return to Program Options\n\n"); 
-                   
+        printf("\t\t[9] Return to previous section\n");
+        printf("\t\t[0] Return to Main Menu\n\n");
+
         printf("\tInput Choice: ");
         scanf("%d", &option);
-        ClearInputBuffer();  
-                
-        if (0 > option || option > 3) 
-            printf("\t\tInvalid input. Please try again\n");                    
-        else 
+        ClearInputBuffer();
+
+        // Validate user input.
+        if (option != 3 && option != 2 && option != 1 && option != 0 && option != 9)
+            printf("\t\tInvalid input. Please try again\n");
+        else
             break;
-    } while (0 > option || option > 3);
-                
-    switch (option){
+    } while (option != 3 && option != 2 && option != 1 && option != 0 && option != 9);
+
+    // Perform sorting based on user's choice.
+    switch (option) {
         case 1: BubbleSort(); break;
         case 2: YearSort(); break;
         case 3: GenderSort(); break;
-        case 0: AccessMinistryMembers(); ExitProgram(0);
+        case 9: AccessMinistryMembers(); ExitProgram(0);
+        case 0: ExecuteProgram(); ExitProgram(0);
         default: printf("\tInvalid option\n");
     }
-            
+
+    // Print the application header and display the ministry member database.
     PrintAppHeader();
     printf("\t|=========================================================================|\n");
     printf("\t|                             MEMBER DATABASE                             |\n");
     printf("\t|-------------------------------------------------------------------------|\n");
-        
+
+    // Loop to display each member's information.
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01++) {
-        AssignMonth(MinistryMembers[idxCtr01].MonthMembership, monthName);            
+        // Assign the month name based on the month number.
+        AssignMonth(MinistryMembers[idxCtr01].MonthMembership, monthName);
+
+        // Display member information in a formatted manner.
         printf("\t| %2d |  Surname: %-35s   | Sex: %-9c   |\n", idxCtr01 + 1, MinistryMembers[idxCtr01].Surname, MinistryMembers[idxCtr01].Sex);
         printf("\t|    |  First Name: %-32s   | Year: %04d       |\n", MinistryMembers[idxCtr01].FirstName, MinistryMembers[idxCtr01].YearMembership);
         printf("\t|    |  Middle Name: %-32s  | Month: %-9s |\n", MinistryMembers[idxCtr01].MiddleName, monthName);
-        printf("\t|    |  Nickname: %-33s    | Day: %02d          |\n", MinistryMembers[idxCtr01].Nickname, MinistryMembers[idxCtr01].DayMembership);   
+        printf("\t|    |  Nickname: %-33s    | Day: %02d          |\n", MinistryMembers[idxCtr01].Nickname, MinistryMembers[idxCtr01].DayMembership);
         printf("\t|-------------------------------------------------------------------------|\n");
     }
 
-    printf("\t====================================================================================\n\n");  
+    printf("\t====================================================================================\n\n");
 }
 
+// Function to print ministry members with their numbers, surnames, and nicknames in two columns.
 void PrintMembersWithNumberAndNickname() {
     printf("\tEXISTING MINISTRY MEMBERS\n\n");
 
     printf("\t===============================================\t\t===============================================\n");
     printf("\t| No. | Surname            | Nickname         |\t\t| No. | Surname            | Nickname         |\n");
-    printf("\t|-----|--------------------|------------------|\t\t|-----|--------------------|------------------|\n");    
+    printf("\t|-----|--------------------|------------------|\t\t|-----|--------------------|------------------|\n");
 
     // Print two tables side by side
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01 += 2) {
@@ -515,15 +591,18 @@ void PrintMembersWithNumberAndNickname() {
     printf("\t===============================================\n");
 }
 
+// Function to compare two MinistryMember structures based on their Index values.
+// This function is designed to be used with the qsort function for sorting.
 int compareIndices(const void *a, const void *b) {
+    // Convert void pointers to MinistryMember pointers for easy access to structure members.
     const MinistryMember *ma = (const MinistryMember *)a;
     const MinistryMember *mb = (const MinistryMember *)b;
 
+    // Compare the Index values of the two MinistryMember structures.
     if ((*ma).Index < (*mb).Index) return -1;
     else if ((*ma).Index > (*mb).Index) return 1;
     else return 0;
 }
-
 // Shared Scheduling Functions
 int GetSelectedMonth(){
     int input;
@@ -892,28 +971,28 @@ void PrintCalendar(int month, int currentYear){ // Needs More Explaining
 
 // Sunday Scheduling Functions
 void AccessSundaysSchedules(){
-    char selectedOption;
+    int selectedOption;
 
     PrintAppHeader();
     printf("\n\tSUNDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
     printf("\t\t[2] View Scheduled Sunday Servers\n");
-    printf("\t\t[=] Go Back\n");
+    printf("\t\t[0] Go Back to Main Menu\n");
     
     do{
         printf("\n\tWhich of the following actions would you like to do? ");
-        scanf(" %c", &selectedOption);
+        scanf(" %d", &selectedOption);
         ClearInputBuffer();
 
-        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '='){
+        if(selectedOption != 1 && selectedOption != 2 && selectedOption != 0){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }           
-    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '=');
+    }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 0);
 
     switch(selectedOption){
-        case '1': AddSundaySchedule(); break;
-        case '2': ViewSundaySchedule(); break; 
-        case '=': ExecuteProgram(); break;
+        case 1: AddSundaySchedule(); break;
+        case 2: ViewSundaySchedule(); break; 
+        case 0: ExecuteProgram(); break;
     }  
 }
 
@@ -1056,28 +1135,28 @@ void AddSundaySchedule(){
 
 // Weekday Scheduling Functions
 void AccessWeekdaysSchedules(){
-    char selectedOption;
+   	int selectedOption;
 
     PrintAppHeader();
     printf("\n\tWEEKDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Weekday\n");
     printf("\t\t[2] View Scheduled Weekday Servers\n");
-    printf("\t\t[=] Go Back\n");
+    printf("\t\t[0] Go Back to Main Menu\n");
     
     do{
         printf("\n\tWhich of the following actions would you like to do? ");
-        scanf(" %c", &selectedOption);
+        scanf(" %d", &selectedOption);
         ClearInputBuffer();
 
-        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '='){
+        if(selectedOption != 1 && selectedOption != 2 && selectedOption != 0){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }           
-    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '=');
+    }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 0);
 
     switch(selectedOption){
-        case '1': AddSundaySchedule(); break;
-        case '2': ViewSundaySchedule(); break; 
-        case '=': ExecuteProgram(); break;
+        case 1: AddSundaySchedule(); break;
+        case 2: ViewSundaySchedule(); break; 
+        case 0: ExecuteProgram(); break;
     }  
 }
 
