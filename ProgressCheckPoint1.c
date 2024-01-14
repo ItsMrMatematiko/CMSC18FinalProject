@@ -85,6 +85,8 @@ void ExportMinistryMembers();
 void ExportSundaySchedules();
 int compareIndices(const void *a, const void *b);
 int compareSundaySchedules(const void *a, const void *b);
+void CheckServerInputZero();
+void PrintSundayTimeSlot();
 
 
 // THE PROGRAM
@@ -492,10 +494,11 @@ void DisplayAll()	{
 }
 
 void PrintMembersWithNumberAndNickname() {
-    printf("\t\n\tMembers with Number and Nickname\n");
+    printf("\tEXISTING MINISTRY MEMBERS\n\n");
 
+    printf("\t===============================================\t\t===============================================\n");
     printf("\t| No. | Surname            | Nickname         |\t\t| No. | Surname            | Nickname         |\n");
-    printf("\t|-----|--------------------|------------------|\t\t|-----|--------------------|------------------|\n");
+    printf("\t|-----|--------------------|------------------|\t\t|-----|--------------------|------------------|\n");    
 
     // Print two tables side by side
     for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01 += 2) {
@@ -504,25 +507,21 @@ void PrintMembersWithNumberAndNickname() {
         // Check if there is a second member in the current row
         if (idxCtr01 + 1 < ministryMemberCount) {
             printf("| %-3d | %-18s | %-16s |\n", idxCtr01 + 2, MinistryMembers[idxCtr01 + 1].Surname, MinistryMembers[idxCtr01 + 1].Nickname);
-        } else {
-            printf("|\n");
         }
-        printf("\t|---------------------------------------------|\t\t|---------------------------------------------|\n");
+
+        else printf("===============================================\n");
     }
 
+    printf("\t===============================================\n");
 }
 
 int compareIndices(const void *a, const void *b) {
     const MinistryMember *ma = (const MinistryMember *)a;
     const MinistryMember *mb = (const MinistryMember *)b;
 
-    if ((*ma).Index < (*mb).Index) {
-        return -1;
-    } else if ((*ma).Index > (*mb).Index) {
-        return 1;
-    } else {
-        return 0;
-    }
+    if ((*ma).Index < (*mb).Index) return -1;
+    else if ((*ma).Index > (*mb).Index) return 1;
+    else return 0;
 }
 
 // Shared Scheduling Functions
@@ -621,7 +620,7 @@ void PrintMonth(int monthCode){
 int AskServerIndex(int *indexInput){
     scanf(" %d", indexInput);
     ClearInputBuffer();
-    CheckSundayServerInputZero(indexInput);
+    CheckServerInputZero(indexInput);
 
     if(*indexInput > ministryMemberCount){
         printf("\t\tYou provided an input beyond the number of members. Please try again.\n\n");
@@ -630,83 +629,32 @@ int AskServerIndex(int *indexInput){
     else return *indexInput;
 }
 
-
-// Sunday Scheduling Functions
-void AccessSundaysSchedules(){
-    char selectedOption;
-
-    PrintAppHeader();
-    printf("\n\tSUNDAY SCHEDULES\n\n");
-    printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
-    printf("\t\t[2] View Scheduled Servers for a Specific Sunday\n");
-    printf("\t\t[=] Go Back\n");
-    
-    do{
-        printf("\n\tWhich of the following actions would you like to do? ");
-        scanf(" %c", &selectedOption);
-        ClearInputBuffer();
-
-        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '='){
-            printf("\t\tYou provided an incorrect input. Please try again.\n\n");
-        }   
-        
-    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '=');
-
-    switch(selectedOption){
-        case '1':
-            AddSundaySchedule();
-            break;
-
-        case '2':
-            ViewSundaySchedule();
-            break;
-
-        case '=':
-            ExecuteProgram();
-            break;
-
-        default:
-            break;
-    }  
-}
-
-void PrintSundayTimeSlot(int timeSlotCode){
-    switch(timeSlotCode){
-        case 1: printf("05:30 AM"); break;
-        case 2: printf("07:00 AM"); break;
-        case 3: printf("08:30 AM"); break;
-        case 4: printf("03:00 PM"); break;
-        case 5: printf("04:30 PM"); break;
-        case 6: printf("06:00 PM"); break;
-    }
-}
-
-void CheckSundayServerInputZero(int *serverIndex){
+void CheckServerInputZero(int *serverIndex){
     if(*serverIndex == 0){
         system("cls");
-        AccessSundaysSchedules();
+        ExecuteProgram();
         ExitProgram(0);
     }
 }
 
-int AssignServer(int year, int month, int date, int timeSlotIndex, int sundayScheduleIndex, int ministryMemberIndex, int servicePosition){    
+void AssignServer(HolyMass *scheduleDatabase, int scheduleIndex, int year, int month, int date, int timeSlotIndex, int ministryMemberIndex, int servicePosition){    
 	if(ministryMemberIndex > 0){
         switch(servicePosition){
             case 0:                
-				strcpy(SundaySchedules[sundayScheduleIndex].FirstReader, MinistryMembers[ministryMemberIndex - 1].Nickname);
-                SundaySchedules[sundayScheduleIndex].isScheduled[0] = 1;                
+				strcpy(scheduleDatabase[scheduleIndex].FirstReader, MinistryMembers[ministryMemberIndex].Nickname);
+                scheduleDatabase[scheduleIndex].isScheduled[0] = 1;                
                 break;
             case 1:
-				strcpy(SundaySchedules[sundayScheduleIndex].SecondReader, MinistryMembers[ministryMemberIndex - 1].Nickname);
-                SundaySchedules[sundayScheduleIndex].isScheduled[1] = 1; 
+				strcpy(scheduleDatabase[scheduleIndex].SecondReader, MinistryMembers[ministryMemberIndex].Nickname);
+                scheduleDatabase[scheduleIndex].isScheduled[1] = 1; 
                 break;
             case 2:
-                strcpy(SundaySchedules[sundayScheduleIndex].POF, MinistryMembers[ministryMemberIndex - 1].Nickname);
-                SundaySchedules[sundayScheduleIndex].isScheduled[2] = 1; 
+                strcpy(scheduleDatabase[scheduleIndex].POF, MinistryMembers[ministryMemberIndex].Nickname);
+                scheduleDatabase[scheduleIndex].isScheduled[2] = 1; 
                 break;
             case 3:
-                strcpy(SundaySchedules[sundayScheduleIndex].Commentator, MinistryMembers[ministryMemberIndex - 1].Nickname);
-                SundaySchedules[sundayScheduleIndex].isScheduled[3] = 1; 
+                strcpy(scheduleDatabase[scheduleIndex].Commentator, MinistryMembers[ministryMemberIndex].Nickname);
+                scheduleDatabase[scheduleIndex].isScheduled[3] = 1; 
                 break;
         }
     }    
@@ -714,28 +662,28 @@ int AssignServer(int year, int month, int date, int timeSlotIndex, int sundaySch
     else{
         switch(servicePosition){
             case 0: 
-                strcpy(SundaySchedules[sundayScheduleIndex].FirstReader, "NONE"); 
-                SundaySchedules[sundayScheduleIndex].isScheduled[0] = 0; 
+                strcpy(scheduleDatabase[scheduleIndex].FirstReader, "NONE"); 
+                scheduleDatabase[scheduleIndex].isScheduled[0] = 0; 
                 break;
             case 1: 
-                strcpy(SundaySchedules[sundayScheduleIndex].SecondReader, "NONE"); 
-                SundaySchedules[sundayScheduleIndex].isScheduled[1] = 0; 
+                strcpy(scheduleDatabase[scheduleIndex].SecondReader, "NONE"); 
+                scheduleDatabase[scheduleIndex].isScheduled[1] = 0; 
                 break;
             case 2: 
-                strcpy(SundaySchedules[sundayScheduleIndex].POF, "NONE"); 
-                SundaySchedules[sundayScheduleIndex].isScheduled[2] = 0; 
+                strcpy(scheduleDatabase[scheduleIndex].POF, "NONE"); 
+                scheduleDatabase[scheduleIndex].isScheduled[2] = 0; 
                 break;
             case 3: 
-                strcpy(SundaySchedules[sundayScheduleIndex].Commentator, "NONE"); 
-                SundaySchedules[sundayScheduleIndex].isScheduled[3] = 0; 
+                strcpy(scheduleDatabase[scheduleIndex].Commentator, "NONE"); 
+                scheduleDatabase[scheduleIndex].isScheduled[3] = 0; 
                 break;
         }        
     }
     
-    SundaySchedules[sundayScheduleIndex].Year = year;
-    SundaySchedules[sundayScheduleIndex].Month = month;
-    SundaySchedules[sundayScheduleIndex].Date = date;
-    SundaySchedules[sundayScheduleIndex].MassNumber = timeSlotIndex;
+    scheduleDatabase[scheduleIndex].Year = year;
+    scheduleDatabase[scheduleIndex].Month = month;
+    scheduleDatabase[scheduleIndex].Date = date;
+    scheduleDatabase[scheduleIndex].MassNumber = timeSlotIndex;
 }
 
 void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverFour){
@@ -743,7 +691,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
         do{
             printf("\t First Reader: ");
             AskServerIndex(serverOne);
-        }while(*serverOne > 50);    
+        }while(*serverOne > ministryMemberCount);    
 
         do{
             printf("\t Second Reader: ");
@@ -752,7 +700,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
             if(*serverOne == *serverTwo && *serverTwo > 0){
                 printf("\t\t You have inputted a duplicate server. Please try again.\n\n");
             }
-        }while(*serverTwo > 50 || (*serverOne == *serverTwo && *serverTwo > 0));
+        }while(*serverTwo > ministryMemberCount || (*serverOne == *serverTwo && *serverTwo > 0));
         
         do{
             printf("\t Prayers of the Faithful (POF): ");
@@ -761,7 +709,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
             if((*serverOne == *serverThree || *serverTwo == *serverThree) && *serverThree > 0){
                 printf("\t\t You have inputted a duplicate server. Please try again.\n\n");
             }
-        }while(*serverThree > 50 || ((*serverOne == *serverThree || *serverTwo == *serverThree) && *serverThree > 0));
+        }while(*serverThree > ministryMemberCount || ((*serverOne == *serverThree || *serverTwo == *serverThree) && *serverThree > 0));
 
         do{
             printf("\t Commentator: ");
@@ -770,146 +718,65 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
             if((*serverOne == *serverFour || *serverTwo == *serverFour || *serverThree == *serverFour) && *serverFour > 0){
                 printf("\t\t You have inputted a duplicate server. Please try again.\n\n");
             }
-        }while(*serverThree > 50 || (*serverOne == *serverFour || *serverTwo == *serverFour || *serverThree == *serverFour) && *serverFour > 0);
+        }while(*serverThree > ministryMemberCount || (*serverOne == *serverFour || *serverTwo == *serverFour || *serverThree == *serverFour) && *serverFour > 0);
 }
 
-void AddSundaySchedule(){
-    int inputMonth, inputSunday, inputTimeSlot, toAssign = 0, dateHasSchedule, scheduleEntryMatch, areSlotsScheduled = 0;
-    int serverOne, serverTwo, serverThree, serverFour;
+void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
+    int year = scheduleDatabase[scheduleDatabaseIndex].Year;
+    int month = scheduleDatabase[scheduleDatabaseIndex].Month;
+    int day = scheduleDatabase[scheduleDatabaseIndex].Date;
+    int timeSlot = scheduleDatabase[scheduleDatabaseIndex].MassNumber;
+
+    int firstServer, secondServer, thirdServer, fourthServer;
     
-    // Preliminary code blocks to access real-time.
-    time_t t;
-    struct tm* current_time;
-    time(&t);
-    current_time = localtime(&t);
-    int currentYear = current_time->tm_year + 1900;
-    
-    PrintAppHeader();
-    printf("\tSUNDAY SERVICE SCHEDULING\n");
-    printf("-----------------------------------------------------------------------------------------------\n");
-
-    // Check for selected month
-    inputMonth = GetSelectedMonth();
-    
-    if(inputMonth == 0){
-        system("cls");
-        AccessSundaysSchedules();
-        ExitProgram(0);
-    }
-    
-    // Print the calendar for the selected month on year 2024
-    PrintCalendar(inputMonth, currentYear);
-
-    // Get the Sunday to be placed with a schedule
-    do{
-        inputSunday = GetSelectedDate(inputMonth);
-
-        if(inputSunday == 0){
-            system("cls");
-            AccessSundaysSchedules();
-            ExitProgram(0);
-        }
-
-        else if(!isSunday(currentYear, inputMonth, inputSunday)){
-            printf("\t\tYou entered a date that is not a Sunday. Please try again.\n\n");
-        }
-    }while(!isSunday(currentYear, inputMonth, inputSunday));
-
-    printf("\n-----------------------------------------------------------------------------------------------\n\n");
-
-    printf("\tPlease select a time slot for the Service Scheduling\n");
-    printf("\t\t[1] 05:30 AM \t\t[4] 03:00 PM\n");
-    printf("\t\t[2] 07:00 AM \t\t[5] 04:30 PM\n");
-    printf("\t\t[3] 08:30 AM \t\t[6] 06:00 PM\n");
-    printf("\t\t[0] Go back to Access Sunday Schedules Menu\n\n");
-
-    // Get the specified time slot for scheduling
-    do{
-        printf("\tSelected Time Slot: ");
-        scanf(" %d", &inputTimeSlot);
-        ClearInputBuffer();
-
-        if(inputTimeSlot < 0 || inputTimeSlot > 6){
-            printf("\t\t\tYou provided an invalid input. Please try again.\n");
-        }		
-
-        else if(inputTimeSlot == 0){
-            system("cls");
-            AccessSundaysSchedules();
-            ExitProgram(0);
-        }
-    }while(inputTimeSlot < 0 || inputTimeSlot > 6);
-    
-    printf("\n-----------------------------------------------------------------------------------------------\n\n");
-
-    // Shows the list of all nicknames
-    PrintMembersWithNumberAndNickname();
-
-    printf("\n-----------------------------------------------------------------------------------------------\n\n");
-
-    // Check if schedule already exists. If it does, then print the available schedule and then let user select schedule to modify
-    dateHasSchedule = 0;
-    scheduleEntryMatch = 0;
-
-    for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
-        scheduleEntryMatch = SundaySchedules[idxCtr01].Year == currentYear &&
-                             SundaySchedules[idxCtr01].Month == inputMonth &&
-                             SundaySchedules[idxCtr01].Date == inputSunday &&
-                             SundaySchedules[idxCtr01].MassNumber == inputTimeSlot;
-        
-        dateHasSchedule = SundaySchedules[idxCtr01].isScheduled[0] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[1] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[2] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[3] == 1;
-
-        if(scheduleEntryMatch && dateHasSchedule){
-            printf("\n\n\tCURRENT SERVERS\n");
-            printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
-            printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
-            printf("\t\tPrayers of the Faithful (POF): %s\n", SundaySchedules[idxCtr01].POF);
-            printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
-            printf("\n-----------------------------------------------------------------------------------------------\n\n");
-            break;
-        }
-    }
-    
-    // If the schedule does not exist, then perform the code below 
     if(ministryMemberCount != 0){
-	    printf("\tDesignate "); 
-	    PrintSundayTimeSlot(inputTimeSlot);
-	    printf(" Servers for ");
-	    PrintMonth(inputMonth);
-	    printf(" %d, %d", inputSunday, currentYear);
+        printf("\tRedesignate All Servers for "); 
+	    PrintMonth(month);
+	    printf(" %d, %d", day, year);
         printf(" at [");
-        PrintSundayTimeSlot(inputTimeSlot);
+        PrintSundayTimeSlot(timeSlot);
+        printf("]\n\n");
+
+        printf("\t If you wish to keep the same servers for a position, simply reinput their index number as shown above.\n");
+
+        printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
+	    printf("\t\tInput [0] to go back to Access Sunday Schedules Menu.\n\n");
+
+        InputServers(&firstServer, &secondServer, &thirdServer, &fourthServer);
+
+        AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, firstServer - 1, 0);
+        AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, secondServer - 1, 1);
+        AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, thirdServer - 1 , 2);
+        AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, fourthServer - 1, 3);
+    }
+
+    else{
+		printf("\tThere are no existing members stored in the program database. You will be redirected to the Main Menu. ");
+		ExecuteProgram();
+		ExitProgram(0);
+	}
+}
+
+void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, int year, int month, int day, int timeSlot, int *firstServer, int *secondServer, int *thirdServer, int *fourthServer){
+    int areSlotsScheduled = 0;
+    
+    if(ministryMemberCount != 0){
+	    printf("\tDesignate Servers for "); 
+	    PrintMonth(month);
+	    printf(" %d, %d", day, year);
+        printf(" at [");
+        PrintSundayTimeSlot(timeSlot);
         printf("]\n");
 	
 	    printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
-	    printf("\t\tInput [0] to go back to Access Sunday Schedules Menu.\n");
+	    printf("\t\tInput [0] to go back to Main Menu.\n\n");
 	
-	    InputServers(&serverOne, &serverTwo, &serverThree, &serverFour);    
-	
-	    // Resizes the dynamic array to store more schedule entries
-	    sundayScheduleCount++;
-	    SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
-	
-	    // Stores the inputs if the input is not equal to 5.
-	    areSlotsScheduled = !SundaySchedules[sundayScheduleCount].isScheduled[0] ||
-	                        !SundaySchedules[sundayScheduleCount].isScheduled[1] ||
-	                        !SundaySchedules[sundayScheduleCount].isScheduled[2] ||
-	                        !SundaySchedules[sundayScheduleCount].isScheduled[3];
-	
-	    if(areSlotsScheduled){
-	        AssignServer(currentYear, inputMonth, inputSunday, inputTimeSlot, sundayScheduleCount - 1, serverOne, 0);
-	        AssignServer(currentYear, inputMonth, inputSunday, inputTimeSlot, sundayScheduleCount - 1, serverTwo, 1);
-	        AssignServer(currentYear, inputMonth, inputSunday, inputTimeSlot, sundayScheduleCount - 1, serverThree, 2);
-	        AssignServer(currentYear, inputMonth, inputSunday, inputTimeSlot, sundayScheduleCount - 1, serverFour, 3);
-	    }
-	
-	    else{
-	        sundayScheduleCount--;
-	        SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
-	    }
+	    InputServers(firstServer, secondServer, thirdServer, fourthServer);
+
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *firstServer, 0);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *secondServer, 1);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *thirdServer, 2);
+	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *fourthServer, 3);
 	}
 	
 	else{
@@ -917,7 +784,6 @@ void AddSundaySchedule(){
 		ExecuteProgram();
 		ExitProgram(0);
 	}
-    
 }
 
 int isSunday(int year, int month, int day) {
@@ -938,49 +804,16 @@ int isSunday(int year, int month, int day) {
     return (dayOfWeek == 0);
 }
 
-
-// Viewing Schedule Functions
-void ViewSundaySchedule(){    
-    printf("\tSUNDAY SCHEDULES\n\n");
-    
-    qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
-    
-    for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
-        printf("\t");
-        PrintMonth(SundaySchedules[idxCtr01].Month);
-        printf(" %d, %d ", SundaySchedules[idxCtr01].Date, SundaySchedules[idxCtr01].Year);
-        printf("at [");
-        PrintSundayTimeSlot(SundaySchedules[idxCtr01].MassNumber);
-        printf("]\n");
-        printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
-        printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
-        printf("\t\tPrayers of the Faithful: %s\n", SundaySchedules[idxCtr01].POF);
-        printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
-    }
-}
-
 int compareSundaySchedules(const void *a, const void *b) {
     const HolyMass *scheduleA = (const HolyMass *)a;
     const HolyMass *scheduleB = (const HolyMass *)b;
 
-    if ((*scheduleA).Year != (*scheduleB).Year) {
-        return (*scheduleA).Year - (*scheduleB).Year;
-    }
-    if ((*scheduleA).Month != (*scheduleB).Month) {
-        return (*scheduleA).Month - (*scheduleB).Month;
-    }
-    if ((*scheduleA).Date != (*scheduleB).Date) {
-        return (*scheduleA).Date - (*scheduleB).Date;
-    }
-    if ((*scheduleA).MassNumber != (*scheduleB).MassNumber) {
-        return (*scheduleA).MassNumber - (*scheduleB).MassNumber;
-    }
+    if ((*scheduleA).Year != (*scheduleB).Year) return (*scheduleA).Year - (*scheduleB).Year;
+    if ((*scheduleA).Month != (*scheduleB).Month) return (*scheduleA).Month - (*scheduleB).Month;
+    if ((*scheduleA).Date != (*scheduleB).Date) return (*scheduleA).Date - (*scheduleB).Date;
+    if ((*scheduleA).MassNumber != (*scheduleB).MassNumber) return (*scheduleA).MassNumber - (*scheduleB).MassNumber;
 
     return 0;
-}
-
-void AccessWeekdaysSchedules(){
-
 }
 
 int CheckForDaysInAMonth(int month, int currentYear) {
@@ -1057,18 +890,191 @@ void PrintCalendar(int month, int currentYear){ // Needs More Explaining
     printf("\n");
 }
 
+// Sunday Scheduling Functions
+void AccessSundaysSchedules(){
+    char selectedOption;
 
-void CheckForExit(int errorCode){
+    PrintAppHeader();
+    printf("\n\tSUNDAY SCHEDULES\n\n");
+    printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
+    printf("\t\t[2] View Scheduled Servers for a Specific Sunday\n");
+    printf("\t\t[=] Go Back\n");
+    
+    do{
+        printf("\n\tWhich of the following actions would you like to do? ");
+        scanf(" %c", &selectedOption);
+        ClearInputBuffer();
+
+        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '='){
+            printf("\t\tYou provided an incorrect input. Please try again.\n\n");
+        }           
+    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '=');
+
+    switch(selectedOption){
+        case '1': AddSundaySchedule(); break;
+        case '2': ViewSundaySchedule(); break; 
+        case '=': ExecuteProgram(); break;
+    }  
+}
+
+void PrintSundayTimeSlot(int timeSlotCode){
+    switch(timeSlotCode){
+        case 1: printf("05:30 AM"); break;
+        case 2: printf("07:00 AM"); break;
+        case 3: printf("08:30 AM"); break;
+        case 4: printf("03:00 PM"); break;
+        case 5: printf("04:30 PM"); break;
+        case 6: printf("06:00 PM"); break;
+    }
+}
+
+void AddSundaySchedule(){
+    int inputMonth, inputSunday, inputTimeSlot, toAssign = 0, dateHasSchedule, scheduleEntryMatch;
+    int serverOne, serverTwo, serverThree, serverFour;
+    
+    // Preliminary code blocks to access real-time.
+    time_t t;
+    struct tm* current_time;
+    time(&t);
+    current_time = localtime(&t);
+    int currentYear = current_time->tm_year + 1900;
+    
+    PrintAppHeader();
+    printf("\tSUNDAY SERVICE SCHEDULING\n");
+    printf("-----------------------------------------------------------------------------------------------\n");
+
+    // Check for selected month
+    inputMonth = GetSelectedMonth();
+    
+    if(inputMonth == 0){
+        system("cls");
+        AccessSundaysSchedules();
+        ExitProgram(0);
+    }
+    
+    // Print the calendar for the selected month on Year 2024
+    PrintCalendar(inputMonth, currentYear);
+
+    // Get the Sunday to be placed with a schedule
+    do{
+        inputSunday = GetSelectedDate(inputMonth);
+
+        if(inputSunday == 0){
+            system("cls");
+            AccessSundaysSchedules();
+            ExitProgram(0);
+        }
+
+        else if(!isSunday(currentYear, inputMonth, inputSunday)){
+            printf("\t\tYou entered a date that is not a Sunday. Please try again.\n\n");
+        }
+    }while(!isSunday(currentYear, inputMonth, inputSunday));
+
+    printf("\n-----------------------------------------------------------------------------------------------\n\n");
+
+    printf("\tPlease select a time slot for the Service Scheduling\n");
+    printf("\t\t[1] 05:30 AM \t\t[4] 03:00 PM\n");
+    printf("\t\t[2] 07:00 AM \t\t[5] 04:30 PM\n");
+    printf("\t\t[3] 08:30 AM \t\t[6] 06:00 PM\n");
+    printf("\t\t[0] Go back to Access Sunday Schedules Menu\n\n");
+
+    // Get the specified time slot for scheduling
+    do{
+        printf("\tSelected Time Slot: ");
+        scanf(" %d", &inputTimeSlot);
+        ClearInputBuffer();
+
+        if(inputTimeSlot < 0 || inputTimeSlot > 6){
+            printf("\t\t\tYou provided an invalid input. Please try again.\n");
+        }		
+
+        else if(inputTimeSlot == 0){
+            system("cls");
+            AccessSundaysSchedules();
+            ExitProgram(0);
+        }
+    }while(inputTimeSlot < 0 || inputTimeSlot > 6);
+    
+    printf("\n-----------------------------------------------------------------------------------------------\n\n");
+
+    // Shows the list of all nicknames
+    PrintMembersWithNumberAndNickname();
+
+    printf("\n-----------------------------------------------------------------------------------------------\n");
+
+    // Check if schedule already exists. If it does, then print the available schedule and then let user select schedule to modify
+    dateHasSchedule = 0;
+    scheduleEntryMatch = 0;
+
+    for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
+        scheduleEntryMatch = SundaySchedules[idxCtr01].Year == currentYear &&
+                             SundaySchedules[idxCtr01].Month == inputMonth &&
+                             SundaySchedules[idxCtr01].Date == inputSunday &&
+                             SundaySchedules[idxCtr01].MassNumber == inputTimeSlot;
+        
+        dateHasSchedule = SundaySchedules[idxCtr01].isScheduled[0] == 1 ||
+                          SundaySchedules[idxCtr01].isScheduled[1] == 1 ||
+                          SundaySchedules[idxCtr01].isScheduled[2] == 1 ||
+                          SundaySchedules[idxCtr01].isScheduled[3] == 1;
+
+        if(scheduleEntryMatch && dateHasSchedule){
+            printf("\n\tCurrent Servers for ");
+            PrintMonth(inputMonth);
+            printf(" %d, %d at [", inputSunday, currentYear);
+            PrintSundayTimeSlot(inputTimeSlot);
+            printf("]\n");
+
+            printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
+            printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
+            printf("\t\tPrayers of the Faithful (POF): %s\n", SundaySchedules[idxCtr01].POF);
+            printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
+            printf("-----------------------------------------------------------------------------------------------\n");
+
+            RedesignateServers(SundaySchedules, idxCtr01);
+            break;
+        }
+
+        else{
+            sundayScheduleCount++;
+	        SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
+
+            DesignateNewServers(SundaySchedules, sundayScheduleCount - 1, currentYear, inputMonth, inputSunday, inputTimeSlot, &serverOne, &serverTwo, &serverThree, &serverFour);
+            break;
+        }
+    }    
+}
+
+// Weekday Scheduling Functions
+void AccessWeekdaysSchedules(){
+    
+}
+
+// Viewing Schedule Functions
+void ViewSundaySchedule(){        
+    PrintAppHeader();
+    printf("\tEXISTING SUNDAY SCHEDULES\n\n");
+    
+    qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+    
+    for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
+        printf("\t");
+        PrintMonth(SundaySchedules[idxCtr01].Month);
+        printf(" %d, %d ", SundaySchedules[idxCtr01].Date, SundaySchedules[idxCtr01].Year);
+        printf("at [");
+        PrintSundayTimeSlot(SundaySchedules[idxCtr01].MassNumber);
+        printf("]\n");
+        printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
+        printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
+        printf("\t\tPrayers of the Faithful: %s\n", SundaySchedules[idxCtr01].POF);
+        printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
+    }
+}
+
+void ViewWeekdaySchedule(){
 
 }
 
-void ExitProgram(int errorCode){
-	BubbleSort();
-    ExportMinistryMembers();
-    ExportSundaySchedules();
-	exit(0);
-}
-
+// File Handling Functions
 void ExportMinistryMembers(){
     MinistryMembersDatabase = fopen("MinistryMembersDatabase.txt", "w");
     
@@ -1164,7 +1170,15 @@ void ImportSundaySchedules(){
 	}	
 }
 
+// Miscellaneous Functions
 void ClearInputBuffer(){
     int character;
     while ((character = getchar()) != '\n' && character != EOF);
+}
+
+void ExitProgram(int errorCode){
+	BubbleSort();
+    ExportMinistryMembers();
+    ExportSundaySchedules();
+	exit(0);
 }
