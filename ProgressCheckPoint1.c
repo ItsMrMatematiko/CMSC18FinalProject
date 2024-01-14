@@ -897,7 +897,7 @@ void AccessSundaysSchedules(){
     PrintAppHeader();
     printf("\n\tSUNDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
-    printf("\t\t[2] View Scheduled Servers for a Specific Sunday\n");
+    printf("\t\t[2] View Scheduled Sunday Servers");
     printf("\t\t[=] Go Back\n");
     
     do{
@@ -1045,7 +1045,29 @@ void AddSundaySchedule(){
 
 // Weekday Scheduling Functions
 void AccessWeekdaysSchedules(){
+    char selectedOption;
 
+    PrintAppHeader();
+    printf("\n\tWEEKDAY SCHEDULES\n\n");
+    printf("\t\t[1] Add/Modify Server Schedules for a Specific Weekday\n");
+    printf("\t\t[2] View Scheduled Weekday Servers\n");
+    printf("\t\t[=] Go Back\n");
+    
+    do{
+        printf("\n\tWhich of the following actions would you like to do? ");
+        scanf(" %c", &selectedOption);
+        ClearInputBuffer();
+
+        if(selectedOption != '1' && selectedOption != '2' && selectedOption != '='){
+            printf("\t\tYou provided an incorrect input. Please try again.\n\n");
+        }           
+    }while(selectedOption != '1' && selectedOption != '2' && selectedOption != '=');
+
+    switch(selectedOption){
+        case '1': AddSundaySchedule(); break;
+        case '2': ViewSundaySchedule(); break; 
+        case '=': ExecuteProgram(); break;
+    }  
 }
 
 // Viewing Schedule Functions
