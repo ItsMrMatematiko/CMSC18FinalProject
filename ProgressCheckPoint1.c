@@ -1,20 +1,16 @@
-// Hi Guys! Mao ni atong gamiton na file for the final project. Naka live share na ni from VSCode.
-// What will happen is diri ta mag code sa VSCode, pero ang pag run sa output is imatch nato sa DevC++
-// since naay uban function nga dili magamit diri sa C++ pero magamit sa Dev. Mao lang ehehe~
+/* 
+    Project Title:
+        Church Lectors' and Commentators' Ministry Scheduling System
 
+    Project Proponents: 
+        ARRANGUEZ, Francis Reid N.
+        CASQUEJO, Jann Dave Rhodore G.
+        MORGIA, Maron Christofer E.
+        RULIDA, Marvie Joyce D.
 
-// Checker for nicknames (Strictly No Duplicates)
-// Fix Format (not urgent)
-// Checker for Existing Schedules (Adding Schedules Function)
-// File Handling (List of Members, List of Sunday Schedules, List of Weekdays Schedules)
-// Input Error Handling (Not finishing fill-ups and skipping data)
-// (Separate Feature of the App) Mark Server Attendance During Serve
-
-
-// scanf("%[^\n]s",str); *PARA NI SA STRING INPUTS NGA IAPIL ANG SPACES
-
-
-// Nicknames should be unique identifiers 
+    Project Completion Date: 
+        15 January 2023
+*/
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -36,7 +32,6 @@ typedef struct MinistryMember{
 } MinistryMember;
 
 
-
 // VARIABLE DECLARATIONS
 int savedSchedulesCount, idxCtr01, idxCtr02;
 HolyMass *SundaySchedules = NULL, *WeekdaySchedules = NULL;
@@ -49,7 +44,6 @@ int ministryMemberCount = 0;
 int sundayScheduleCount = 0;
 int weekdayScheduleCount = 0;
 char temp, toContinue;
-
 
 
 // FUNCTION PROTOTYPE DECLARATIONS
@@ -89,15 +83,27 @@ void CheckServerInputZero();
 void PrintSundayTimeSlot();
 
 
-// THE MAIN PROGRAM
-int main(){
-    // Allocate memory for MinistryMembers struct array.
+
+int main(){    
+    // This is the main program where the essential program functions are called.
+    // It is expected to do the following:
+    //      [1] Allocate Memory for the Dynamic Arrays while importing the database contents
+    //          from the .txt files to their corresponding dynamic arrays
+    //      [2] Call the execution of the program functionalities	
     
-    MinistryMembers = (MinistryMember *)realloc(MinistryMembers, MAX * sizeof(MinistryMember));
-	ImportMinistryMembers(); 
+    // This code line imports the stored MinistryMember records into the MinistryMembers dynamic array.
+    ImportMinistryMembers(); 
+
+    // These next two code lines import the stored schedules from both the SundaySchedules and 
+    // WeekdaySchedules .txt files to their corresponding databases.
 	ImportSchedules(&SundaySchedules, &sundayScheduleCount, "SundayScheduleDatabase.txt"); // Import existing Ministry Members data.
     ImportSchedules(&WeekdaySchedules, &weekdayScheduleCount, "WeekdayScheduleDatabase.txt"); // Import existing Sunday schedules. 
-    ExecuteProgram(); // Execute the main program logic.
+    
+    // This code line calls the rest of the program functionalities and executes the program.
+    ExecuteProgram();
+
+    // This is an expected return value as the main() function is set to return an integer value.
+    return 0;
 }
 
 // Function to print out the main header of the program.
@@ -1386,21 +1392,25 @@ void ExportMinistryMembers(){
 
 void ImportMinistryMembers(){
     idxCtr01 = 0;
+
 	MinistryMembersDatabase = fopen("MinistryMembersDatabase.txt", "r");
+
+    MinistryMembers = (MinistryMember *)realloc(MinistryMembers, (idxCtr01 + 1) * sizeof(MinistryMember));
 	
-    if(MinistryMembersDatabase == NULL)  fclose(MinistryMembersDatabase);
+    if(MinistryMembersDatabase == NULL)  return;
 	else{
 		while (fscanf(MinistryMembersDatabase, "%d, %[^,], %[^,], %[^,], %[^,], %c, %d, %d, %d\n", 
-	        &MinistryMembers[idxCtr01].Index,
-	        MinistryMembers[idxCtr01].Surname,
-	        MinistryMembers[idxCtr01].FirstName,
-	        MinistryMembers[idxCtr01].MiddleName,
-	        MinistryMembers[idxCtr01].Nickname,
-	        &MinistryMembers[idxCtr01].Sex,
-	        &MinistryMembers[idxCtr01].YearMembership,
-	        &MinistryMembers[idxCtr01].MonthMembership,
-	        &MinistryMembers[idxCtr01].DayMembership) != EOF) {	        	
-				idxCtr01++;	        	
+                    &MinistryMembers[idxCtr01].Index,
+                    MinistryMembers[idxCtr01].Surname,
+                    MinistryMembers[idxCtr01].FirstName,
+                    MinistryMembers[idxCtr01].MiddleName,
+                    MinistryMembers[idxCtr01].Nickname,
+                    &MinistryMembers[idxCtr01].Sex,
+                    &MinistryMembers[idxCtr01].YearMembership,
+                    &MinistryMembers[idxCtr01].MonthMembership,
+                    &MinistryMembers[idxCtr01].DayMembership) != EOF) {	        	
+			idxCtr01++;
+            MinistryMembers = (MinistryMember *)realloc(MinistryMembers, (idxCtr01 + 1) * sizeof(MinistryMember));	        	
     	}
 
     	ministryMemberCount = idxCtr01;
@@ -1475,5 +1485,10 @@ void ExitProgram(int errorCode){
     ExportMinistryMembers();
     ExportSchedules(SundaySchedules, &sundayScheduleCount, 1);
     ExportSchedules(WeekdaySchedules, &weekdayScheduleCount, 0);
+
+    free(MinistryMembers);
+    free(SundaySchedules);
+    free(WeekdaySchedules);
+
 	exit(0);
 }
