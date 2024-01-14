@@ -897,7 +897,7 @@ void AccessSundaysSchedules(){
     PrintAppHeader();
     printf("\n\tSUNDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
-    printf("\t\t[2] View Scheduled Sunday Servers");
+    printf("\t\t[2] View Scheduled Sunday Servers\n");
     printf("\t\t[=] Go Back\n");
     
     do{
@@ -932,7 +932,7 @@ void AddSundaySchedule(){
     int inputMonth, inputSunday, inputTimeSlot, toAssign = 0, dateHasSchedule, scheduleEntryMatch;
     int serverOne, serverTwo, serverThree, serverFour;
     
-    // Preliminary code blocks to access real-time.
+    // The next 5 lines of a code block are preliminary codes for the program access the current time.
     time_t t;
     struct tm* current_time;
     time(&t);
@@ -943,7 +943,8 @@ void AddSundaySchedule(){
     printf("\tSUNDAY SERVICE SCHEDULING\n");
     printf("-----------------------------------------------------------------------------------------------\n");
 
-    // Check for selected month
+    // This code block will ask the user to select a month that would be scheduled.
+    // Only the months in year 2024 will be scheduled.
     inputMonth = GetSelectedMonth();
     
     if(inputMonth == 0){
@@ -952,10 +953,11 @@ void AddSundaySchedule(){
         ExitProgram(0);
     }
     
-    // Print the calendar for the selected month on Year 2024
+    // This line will call the function to print a calendar that can be viewed by the user.
     PrintCalendar(inputMonth, currentYear);
 
-    // Get the Sunday to be placed with a schedule
+    // This do-while loop will ask the user to select a day that would be given a schedule.
+    // This loop will handle errors concerning the date inputs: be it a past date, an invalid date, or a non-Sunday date.
     do{
         inputSunday = GetSelectedDate(inputMonth);
 
@@ -978,7 +980,7 @@ void AddSundaySchedule(){
     printf("\t\t[3] 08:30 AM \t\t[6] 06:00 PM\n");
     printf("\t\t[0] Go back to Access Sunday Schedules Menu\n\n");
 
-    // Get the specified time slot for scheduling
+    // This do-while loop will ask the user to select a time slot for a specific Sunday and check if it is a valid input.
     do{
         printf("\tSelected Time Slot: ");
         scanf(" %d", &inputTimeSlot);
@@ -997,48 +999,57 @@ void AddSundaySchedule(){
     
     printf("\n-----------------------------------------------------------------------------------------------\n\n");
 
-    // Shows the list of all nicknames
+    // This line will call the function that would print the index of the existing members alongside their nicknames.
     PrintMembersWithNumberAndNickname();
 
     printf("\n-----------------------------------------------------------------------------------------------\n");
 
-    // Check if schedule already exists. If it does, then print the available schedule and then let user select schedule to modify
-    dateHasSchedule = 0;
+    // This code block (up until the end of this function) will check for the existing schedules in the SundaySchedules dynamic array.
+    // If there is an existing schedule, then it will be open for modifications.
+    // If there are no existing schedules, then it will be created and assigned accordingly.
+    dateHasSchedule = 0; 
     scheduleEntryMatch = 0;
 
     for(idxCtr01 = 0; idxCtr01 < sundayScheduleCount; idxCtr01++){
+        // This value assignment will check for an exact match of an existing schedule in the SundaySchedules dynamic array.
         scheduleEntryMatch = SundaySchedules[idxCtr01].Year == currentYear &&
                              SundaySchedules[idxCtr01].Month == inputMonth &&
                              SundaySchedules[idxCtr01].Date == inputSunday &&
                              SundaySchedules[idxCtr01].MassNumber == inputTimeSlot;
-        
-        dateHasSchedule = SundaySchedules[idxCtr01].isScheduled[0] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[1] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[2] == 1 ||
-                          SundaySchedules[idxCtr01].isScheduled[3] == 1;
 
-        if(scheduleEntryMatch && dateHasSchedule){
+        // This if condition checks if there is both an existing schedule in the record and a schedule assignment for the said schedule.
+        // This code block shall cater to both assigned and marked as 'NONE' positions, provided that not all date entries
+        // would exist prior to running this program.
+        if(scheduleEntryMatch){
+            // This code block will print the  date and time slot of the existing schedule
             printf("\n\tCurrent Servers for ");
             PrintMonth(inputMonth);
             printf(" %d, %d at [", inputSunday, currentYear);
             PrintSundayTimeSlot(inputTimeSlot);
             printf("]\n");
 
+            // This code block will print the names of those assigned in a specific service schedule position.
             printf("\t\tFirst Reader: %s\n", SundaySchedules[idxCtr01].FirstReader);
             printf("\t\tSecond Reader: %s\n", SundaySchedules[idxCtr01].SecondReader);
             printf("\t\tPrayers of the Faithful (POF): %s\n", SundaySchedules[idxCtr01].POF);
             printf("\t\tCommentator: %s\n\n", SundaySchedules[idxCtr01].Commentator);
             printf("-----------------------------------------------------------------------------------------------\n");
 
+            // This code line will call the function that allows the user to redesignate the schedules of the servers.
             RedesignateServers(SundaySchedules, idxCtr01);
             break;
         }
     }
 
-    if(!scheduleEntryMatch || !dateHasSchedule){
-        sundayScheduleCount++;
+    // Should the schedule date not yet exist in the SundaySchedules dynamic array, then this condition will be performed.
+    if(!scheduleEntryMatch){
+        // This line increments the number of schedules stored in the SundaySchedules dynamic array.
+        sundayScheduleCount++; 
+        
+        // This line will reallocate memory to cater the new entry to be encoded to the SundaySchedules dynamic array.
 	    SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
 
+        // This code line will call the function that allows the user to add new server schedules into the SundaySchedules dynamic array.
         DesignateNewServers(SundaySchedules, sundayScheduleCount - 1, currentYear, inputMonth, inputSunday, inputTimeSlot, &serverOne, &serverTwo, &serverThree, &serverFour);
     }    
 }
