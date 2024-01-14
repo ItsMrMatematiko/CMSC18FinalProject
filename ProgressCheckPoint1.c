@@ -48,39 +48,53 @@ char temp, toContinue;
 
 // FUNCTION PROTOTYPE DECLARATIONS
 void PrintAppHeader();
-void ClearInputBuffer();
 void ExecuteProgram();
 int MainMenu();
 void AccessMinistryMembers();
-void DeleteMinistryMember();
-void AccessWeekdaysSchedules();
-void AccessSundaysSchedules();
-void AddSundaySchedule();
-void ViewSundaySchedule();
-int CheckForDaysInAMonth(int, int);
-int isSunday(int, int, int);
-void PrintCalendar(int, int);
-void ExitProgram(int);
 void AddRecord();
-void AssignMonth(int, char*);
-void CheckNewRecordEqualsSignChar(char*);
-void CheckNewRecordEqualsSignChar2(char);
+void DeleteMinistryMember();
+void CheckNewRecordEqualsSignChar(char *);
 void CheckNewRecordEqualsSignInt(int);
-void PrintMembersWithNumberAndNickname();
-void DisplayAll();
+void CheckNewRecordEqualsSignChar2(char);
 void BubbleSort();
-void BubbleSortGender(int genderoption);
 void YearSort();
 void GenderSort();
-void ImportMinistryMembers();
-void ImportSundaySchedules();
-void CheckSundayServerInputZero(int*);
-void ExportMinistryMembers();
-void ExportSundaySchedules();
+void BubbleSortGender(int);
+void DisplayAll();
+void PrintMembersWithNumberAndNickname();
 int compareIndices(const void *a, const void *b);
+int GetSelectedMonth();
+int GetSelectedDate(int month);
+void AssignMonth(int, char *);
+void PrintMonth(int);
+int AskServerIndex(int *indexInput);
+void CheckServerInputZero(int *);
+void AssignServer(HolyMass *scheduleDatabase, int, int, int, int, int, int, int);
+void InputServers(int *, int *, int *, int *);
+void RedesignateServers(HolyMass *scheduleDatabase, int);
+void DesignateNewServers(HolyMass *scheduleDatabase, int, int, int, int, int, int *, int *, int *, int *);
+int isSunday(int, int, int);
+int isMonday(int, int, int);
 int compareSundaySchedules(const void *a, const void *b);
-void CheckServerInputZero();
-void PrintSundayTimeSlot();
+int CheckForDaysInAMonth(int, int);
+void PrintCalendar(int, int);
+void AccessSundaysSchedules();
+void PrintSundayTimeSlot(int);
+void AddSundaySchedule();
+void AccessSundaysSchedules();
+void PrintSundayTimeSlot(int);
+void DesignateNewServers(HolyMass *scheduleDatabase, int, int, int, int, int, int *, int *, int *, int *);
+void RedesignateServers(HolyMass *scheduleDatabase, int);
+void AccessWeekdaysSchedules();
+void PrintWeekdayTimeSlot(int);
+void AddWeekdaySchedule();
+void ViewSchedule(int);
+void ExportMinistryMembers();
+void ImportMinistryMembers();
+void ExportSchedules(HolyMass *scheduleDatabase, int *, int);
+void ImportSchedules(HolyMass **scheduleDatabase, int *, char *);
+void ClearInputBuffer();
+void ExitProgram(int);
 
 
 
@@ -229,7 +243,7 @@ void AddRecord(){
     	PrintAppHeader();
         printf("\n\t-----------------------------------------------------------------");
         printf("\n\n");
-        printf("\tIf you wish to return to the previous section please enter: [9]\n");
+        printf("\tIf you wish to return to the previous section please enter: [=]\n");
         printf("\tIf you wish to return to the Main Menu please enter: [0]\n\n");
             
         printf("\tEnter Member's Surname: "); // User input for member surname.
@@ -381,39 +395,37 @@ void DeleteMinistryMember(){
     printf("\n\t-----------------------------------------------------------------\n\n");
 }
 
- // Checks user input for 9 or 0 to either return to previous section or return to Main Menu (string variables).
+// Checks user input for '=' or '0' to either return to the previous section or return to Main Menu (string variables).
 void CheckNewRecordEqualsSignChar(char* temp){
-	 if (strcmp(temp, "0") == 0) {
-                ExecuteProgram();
-            	ExitProgram(0);
-		}
-	else if (strcmp(temp, "9") == 0) {
-				AccessMinistryMembers();
-                ExitProgram(0);
-	}
+    if (strcmp(temp, "=") == 0) {
+    	AccessMinistryMembers();
+        ExitProgram(0);
+    }
+    else if (strcmp(temp, "0") == 0) {
+        ExecuteProgram();
+        ExitProgram(0);
+    }
 }
 
-// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (integer variables).
+// Checks user input for '=' or '0' to either return to the previous section or return to Main Menu (integer variables).
 void CheckNewRecordEqualsSignInt(int temp){
-	 if (temp == 0) 
-	 {
-                ExecuteProgram();
-                ExitProgram(0);
-}
-	if (temp == 9)
-	{
-		AccessMinistryMembers();
-                ExitProgram(0);
-	}
+    if (temp == 0) {
+        ExecuteProgram();
+        ExitProgram(0);
+    }
+    if (temp == '=') {
+        AccessMinistryMembers();
+        ExitProgram(0);
+    }
 }
 
-// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (character variables).
+// Checks user input for '=' or '0' to either return to the previous section or return to Main Menu (character variables).
 void CheckNewRecordEqualsSignChar2(char temp){
     if (temp == '0') {
         ExecuteProgram();
         ExitProgram(0);
     }
-    if (temp == '9') {
+    if (temp == '=') {
         AccessMinistryMembers();
         ExitProgram(0);
     }
