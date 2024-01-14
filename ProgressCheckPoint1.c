@@ -1033,20 +1033,19 @@ void AddSundaySchedule(){
             RedesignateServers(SundaySchedules, idxCtr01);
             break;
         }
+    }
 
-        else{
-            sundayScheduleCount++;
-	        SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
+    if(!scheduleEntryMatch || !dateHasSchedule){
+        sundayScheduleCount++;
+	    SundaySchedules = (HolyMass *)realloc(SundaySchedules, sizeof(HolyMass) * sundayScheduleCount);
 
-            DesignateNewServers(SundaySchedules, sundayScheduleCount - 1, currentYear, inputMonth, inputSunday, inputTimeSlot, &serverOne, &serverTwo, &serverThree, &serverFour);
-            break;
-        }
+        DesignateNewServers(SundaySchedules, sundayScheduleCount - 1, currentYear, inputMonth, inputSunday, inputTimeSlot, &serverOne, &serverTwo, &serverThree, &serverFour);
     }    
 }
 
 // Weekday Scheduling Functions
 void AccessWeekdaysSchedules(){
-    
+
 }
 
 // Viewing Schedule Functions
