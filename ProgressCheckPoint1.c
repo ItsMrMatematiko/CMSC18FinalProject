@@ -137,8 +137,6 @@ void ExecuteProgram(){
     PrintAppHeader();
 
     int choiceOfAction = MainMenu(); // Display and get user input from the main menu.
-    
-    printf("%d", choiceOfAction);
 
     // Execute the selected action based on user input.
     switch(choiceOfAction){
@@ -224,6 +222,13 @@ void AccessMinistryMembers(){
 void AddNewMinistryMember(){
 	char tempSurname[21], tempFirstName[31], tempMiddleName[16], tempNickname[16], tempSex;
 	int tempYear, tempMonth, tempDay, nicknameExists = 0, daysInMonth;
+
+    // The following code lines are preliminary codes to access the current time.
+    time_t t;
+    struct tm* current_time;
+    time(&t);
+    current_time = localtime(&t);
+    int currentYear = current_time->tm_year + 1900;
 	
 	// If function to make sure ministry member input does not exceed max storage capacity of MinistryMembers struct.
     if (ministryMemberCount < MAX_MEMBERS)
@@ -251,7 +256,7 @@ void AddNewMinistryMember(){
         do {
         	nicknameExists = 0;
         	
-            printf("\tEnter Member's Nickname: "); // User input for member nick name.
+            printf("\tEnter Member's Nickname: "); // User input for member nickname.
             scanf(" %[^\n]s", &tempNickname);
             CheckNewRecordEqualsSignChar(tempNickname);  
             ClearInputBuffer();
@@ -264,9 +269,7 @@ void AddNewMinistryMember(){
                 }
             }
 
-            if (nicknameExists == 0) {
-                break;
-            }
+            if (nicknameExists == 0) break;
         } while (nicknameExists = 1);
         
 		// Do-while loop to make sure that user input is only equal to m, M, f, or F.    
@@ -275,11 +278,13 @@ void AddNewMinistryMember(){
     		scanf(" %c", &tempSex);
     		ClearInputBuffer();
 
-    		// Check for special cases
+    		// Check for special input cases
     		if (tempSex == '0') {
     		    ExecuteProgram();
     		    ExitProgram(0);
-    		} else if (tempSex == '-') {
+    		} 
+            
+            else if (tempSex == '-') {
     		    AccessMinistryMembers();
     		    FinalPrint();
     		}
@@ -288,12 +293,10 @@ void AddNewMinistryMember(){
     		
     		if (tempSex != 'M' && tempSex != 'F') {
     		    printf("\t\tInvalid input, please choose between M or F. Or enter -1 or 0.\n");
-    		}
-
-    			
-			} while (tempSex != 'M' && tempSex != 'F'); 
+    		}    			
+		} while (tempSex != 'M' && tempSex != 'F'); 
         
-        // Do while loop to ensure proper timeline of church
+        // Do while loop to ensure valid year inputs (1952-2024, 2024 being the current year)
 		do {    
             printf("\tEnter year of Membership: "); // User input for member's year of membership
             scanf("%d", &tempYear);
@@ -302,12 +305,11 @@ void AddNewMinistryMember(){
             if (tempYear < 1952) 
                 printf("\t\tInvalid year. The church has not yet existed at this time.\n");
 
-            else if (tempYear > 2024)
+            else if (tempYear > currentYear)
                 printf("\t\tInvalid year. Please enter a year between 1952 and 2024.\n");
 
-            else 
-                break;
-        } while (tempYear < 1952 || tempYear > 2024);
+            else break;
+        } while (tempYear < 1952 || tempYear > currentYear);
         
 		// Do while loop to ensure user input is along the range of months in a year.    
         do {
@@ -318,9 +320,7 @@ void AddNewMinistryMember(){
             if (1 > tempMonth || 12 < tempMonth)
                 printf("\t\tInvalid Month please choose between 1-12\n");
 
-            else
-                break;
-
+            else break;
         } while (1 > tempMonth || 12 < tempMonth);
         
 		// Do while loop to ensure user input for day corresponds with the year and month previously inputted.
@@ -336,8 +336,7 @@ void AddNewMinistryMember(){
     		if (tempDay < 1 || tempDay > daysInMonth)
         		printf("\t\tInvalid day for the selected month. Please try again.\n");
     		
-            else
-        	    break;
+            else break;
         } while (tempDay < 1 || tempDay > daysInMonth);
 
 		// Reassigns variables to MinistryMembers instances according to current count.
@@ -352,41 +351,39 @@ void AddNewMinistryMember(){
 		MinistryMembers[ministryMemberCount].DayMembership = tempDay;
         ministryMemberCount++; // Increments total count for ministry members.
 
-        printf("\n\tA new member record has been added to the database.\n");
-            
-        }
+        printf("\n\tA new member record has been added to the database.\n");            
+    }
 
-        else    
-            printf("\t\tAction declined. Maximum amount of records acquired. Please delete a member.\n");
+    else printf("\t\tAction declined. Maximum amount of records acquired. Please delete a member.\n");
     
-    
-    printf("\n");
-    printf("\t-----------------------------------------------------------------\n\n");
+    printf("\n\t-----------------------------------------------------------------\n\n");
 
 }
 
 // Function for erasing Ministry Member in database.
 void DeleteMinistryMember(){
-    int DeletedMember;
+    int deletedMember;
     PrintAppHeader();
     DisplayAll(); // Calls to function DisplayAll to display all curent members in database.
 
     printf("\n\tEnter the number of the member you want to delete [0] to cancel.: "); 
-    scanf(" %d", &DeletedMember);
+    scanf(" %d", &deletedMember);
     ClearInputBuffer();
 	
 	// Check if the entered member number is within valid range
-    if (DeletedMember >= 1 && DeletedMember <= ministryMemberCount) {
+    if (deletedMember >= 1 && deletedMember <= ministryMemberCount) {
     	
     	// Loop to shift array elements to fill the gap left by the deleted member
-        for (idxCtr01 = DeletedMember - 1; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
+        for (idxCtr01 = deletedMember - 1; idxCtr01 < ministryMemberCount - 1; idxCtr01++) {
             MinistryMembers[idxCtr01] = MinistryMembers[idxCtr01 + 1];
             MinistryMembers[idxCtr01].Index = idxCtr01 + 1; // Update the index of the moved member
         }
 
         ministryMemberCount--; // Reduce the count of members after deletion
         printf("\n\tMember deleted successfully.\n");
-    } else if (DeletedMember != 0) {
+    } 
+    
+    else if (deletedMember != 0) {
     	// If the entered member number is not in the valid range
         printf("\n\tInvalid member number. No changes made.\n");
     }
@@ -400,6 +397,7 @@ void CheckNewRecordEqualsSignChar(char* temp){
     	AccessMinistryMembers();
     	FinalPrint();
     }
+
     else if (strcmp(temp, "0") == 0) {
         ExecuteProgram();
         ExitProgram(0);
@@ -412,7 +410,8 @@ void CheckNewRecordEqualsSignInt(int temp){
         ExecuteProgram();
         ExitProgram(0);
     }
-    if (temp == -1) {
+    
+    else if (temp == -1) {
         AccessMinistryMembers();
         FinalPrint();
     }
@@ -468,31 +467,30 @@ void GenderSort(){
 
 	PrintAppHeader();
 	do{
-    printf("\n\tSort by Gender:\n");
-    printf("\t\t[1] Male first\n");
-    printf("\t\t[2] Female first\n");
-    printf("\t\t[0] Return to Main Menu\n");
-    printf("\t\t[-1] Return to previous section\n\n");
+        printf("\n\tSort by Gender:\n");
+        printf("\t\t[1] Male first\n");
+        printf("\t\t[2] Female first\n");
+        printf("\t\t[0] Return to Main Menu\n");
+        printf("\t\t[-1] Return to previous section\n\n");
 
-    printf("\tEnter your choice: ");
-    scanf("%d", &genderOption);
-    ClearInputBuffer(); 
-    
-    if (genderOption == 0){
-		ExecuteProgram();
-		ExitProgram(0);
-	}
-	else if (genderOption == -1){
-		DisplayAll();
-		FinalPrint();
-	}
-	
-    if (genderOption != 2 && genderOption != 1 && genderOption != 0 && genderOption !=-1){
-    	printf("\t\t\t Invalid input. Please try again");
-	}
-    }while (genderOption != 2 && genderOption != 1 && genderOption != 0 && genderOption !=-1);
-     
+        printf("\tEnter your choice: ");
+        scanf(" %d", &genderOption);
+        ClearInputBuffer(); 
         
+        if (genderOption == 0){
+            ExecuteProgram();
+            ExitProgram(0);
+        }
+        else if (genderOption == -1){
+            DisplayAll();
+            FinalPrint();
+        }
+        
+        if (genderOption != 2 && genderOption != 1 && genderOption != 0 && genderOption !=-1){
+            printf("\t\t\t Invalid input. Please try again");
+        }
+    }while (genderOption != 2 && genderOption != 1 && genderOption != 0 && genderOption !=-1);
+
     BubbleSortGender(genderOption);
 }
 
@@ -541,8 +539,8 @@ void DisplayAll() {
         // Validate user input.
         if (option != 3 && option != 2 && option != 1 && option != 0 && option != -1)
             printf("\t\tInvalid input. Please try again\n");
-        else
-            break;
+
+        else break;
     } while (option != 3 && option != 2 && option != 1 && option != 0 && option != -1);
 
     // Perform sorting based on user's choice.
@@ -582,8 +580,6 @@ void DisplayAll() {
 		printf("\t|              There are no existing members in the database.             |\n");
 	}
 	
-	
-
     printf("\t===========================================================================\n\n");
 }
 
@@ -809,11 +805,14 @@ void AssignServer(HolyMass *scheduleDatabase, int scheduleIndex, int year, int m
 void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverFour){
     	//Do-while loops that prompts and get user inputs
     	//Ensures that each member is assigned only once per timeslot/schedule
+        
+        // Get the first reader assignment
         do{
             printf("\t First Reader: ");
             AskServerIndex(serverOne);
         }while(*serverOne > ministryMemberCount);    
 
+        // Get the second reader assignment
         do{
             printf("\t Second Reader: ");
             AskServerIndex(serverTwo);
@@ -823,6 +822,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
             }
         }while(*serverTwo > ministryMemberCount || (*serverOne == *serverTwo && *serverTwo > 0));
         
+        // Get the POF assignment
         do{
             printf("\t Prayers of the Faithful (POF): ");
             AskServerIndex(serverThree);
@@ -832,6 +832,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
             }
         }while(*serverThree > ministryMemberCount || ((*serverOne == *serverThree || *serverTwo == *serverThree) && *serverThree > 0));
 
+        // Get the commentator assignment
         do{
             printf("\t Commentator: ");
             AskServerIndex(serverFour);
@@ -842,7 +843,7 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
         }while(*serverThree > ministryMemberCount || (*serverOne == *serverFour || *serverTwo == *serverFour || *serverThree == *serverFour) && *serverFour > 0);
 }
 
-// Function to redesignate servers for a specific schedule
+// Function to redesignate servers for a specific existing schedule
 void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
 	// Declarations that assigns schedule details from the scheduleDatabase
     int year = scheduleDatabase[scheduleDatabaseIndex].Year;
@@ -886,13 +887,8 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
 	}
 }
 
-// Function that designates new servers to a specific schedule
+// Function that designates new servers to a newly specified schedule
 void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, int year, int month, int day, int timeSlot, int *firstServer, int *secondServer, int *thirdServer, int *fourthServer){
-	
-    time_t t;
-    struct tm* current_time;
-    time(&t);
-    current_time = localtime(&t);
     
     // Checks if there are existing members
     if(ministryMemberCount != 0){
@@ -928,10 +924,10 @@ void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, 
 
 // Function that checks if the date chosen is Sunday
 int isSunday(int year, int month, int day) {
-    // Create a tm structure and initialize it with the given date
+    // Preliminary code blocks to access current time
     struct tm date = {0};
-    date.tm_year = year - 1900; // Years since 1900
-    date.tm_mon = month - 1;   // Months are 0-based
+    date.tm_year = year - 1900; 
+    date.tm_mon = month - 1;
     date.tm_mday = day;
 
     // Convert the tm structure to time_t
@@ -946,10 +942,10 @@ int isSunday(int year, int month, int day) {
 }
 
 int isMonday(int year, int month, int day) {
-    // Create a tm structure and initialize it with the given date
+    // Preliminary code blocks to access current time
     struct tm date = {0};
-    date.tm_year = year - 1900; // Years since 1900
-    date.tm_mon = month - 1;   // Months are 0-based
+    date.tm_year = year - 1900; 
+    date.tm_mon = month - 1; 
     date.tm_mday = day;
 
     // Convert the tm structure to time_t
@@ -974,7 +970,7 @@ int compareSundaySchedules(const void *a, const void *b) {
     if ((*scheduleA).Date != (*scheduleB).Date) return (*scheduleA).Date - (*scheduleB).Date;
     if ((*scheduleA).MassNumber != (*scheduleB).MassNumber) return (*scheduleA).MassNumber - (*scheduleB).MassNumber;
 	
-	// If all fields are equal, return 0 indicating both schedules are equal
+	// If all fields are equal, return 0. It will indicate that both schedules are equal
     return 0;
 }
 
@@ -997,7 +993,7 @@ void PrintCalendar(int month, int currentYear){ // Needs More Explaining
     // Get the number of days in the specified month
     daysInAMonth = CheckForDaysInAMonth(month, currentYear);
 
-    // Get the current date
+    // Preliminary code blocks to access current time
     time_t t;
     struct tm* current_time;
     time(&t);
@@ -1037,6 +1033,7 @@ void PrintCalendar(int month, int currentYear){ // Needs More Explaining
     printf("\t\t\t\t---------------------------\n");
     printf("\t\t\t\tSun Mon Tue Wed Thu Fri Sat\n");
     printf("\t\t\t\t");
+    
     // Print leading spaces
     for (idxCtr01 = 0; idxCtr01 < weekday; idxCtr01++) {
         printf("    ");
@@ -1104,7 +1101,7 @@ void AddSundaySchedule(){
     int inputMonth, inputSunday, inputTimeSlot, toAssign = 0, dateHasSchedule, scheduleEntryMatch;
     int serverOne, serverTwo, serverThree, serverFour;
     
-    // The next 5 lines of a code block are preliminary codes for the program access the current time.
+    // Preliminary code blocks to access current time
     time_t t;
     struct tm* current_time;
     time(&t);
@@ -1139,9 +1136,9 @@ void AddSundaySchedule(){
         inputSunday = GetSelectedDate(inputMonth);
 
         if(inputSunday == -1){
-        system("cls");
-        AccessSundaysSchedules();
-        FinalPrint();
+            system("cls");
+            AccessSundaysSchedules();
+            FinalPrint();
     	}
     
     	else if(inputSunday == 0){
@@ -1180,7 +1177,8 @@ void AddSundaySchedule(){
         }
         
         else if(inputMonth == 0){
-        	ExecuteProgram;
+        	ExecuteProgram();
+            ExitProgram(0);
     	}
     }while(inputTimeSlot < 1 || inputTimeSlot > 6);
     
@@ -1288,7 +1286,7 @@ void AddWeekdaySchedule(){
     int inputMonth, inputWeekday, inputTimeSlot, toAssign = 0, scheduleEntryMatch;
     int serverOne, serverTwo, serverThree, serverFour;
     
-    // The next 5 lines of a code block are preliminary codes for the program access the current time.
+    // Preliminary code blocks to access current time
     time_t t;
     struct tm* current_time;
     time(&t);
@@ -1515,6 +1513,7 @@ void ImportMinistryMembers(){
 	
 	// Check if the file is opened successfully
     if(MinistryMembersDatabase == NULL)  return;
+    
 	else{
 		// Read data from the file until the EOF is reached
 		while (fscanf(MinistryMembersDatabase, "%d, %[^,], %[^,], %[^,], %[^,], %c, %d, %d, %d\n", 
