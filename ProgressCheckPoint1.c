@@ -18,7 +18,7 @@
 #include<ctype.h>
 #include<time.h>
 
-#define MAX 50
+#define MAX_MEMBERS 50
 
 // STRUCTURE DECLARATIONS
 typedef struct HolyMass{
@@ -229,7 +229,7 @@ void AddNewMinistryMember(){
 	int tempYear, tempMonth, tempDay, nicknameExists = 0, daysInMonth;
 	
 	// If function to make sure ministry member input does not exceed max storage capacity of MinistryMembers struct.
-    if (ministryMemberCount < MAX)
+    if (ministryMemberCount < MAX_MEMBERS)
     {
     	PrintAppHeader();
         printf("\n\t-----------------------------------------------------------------\n\n");
