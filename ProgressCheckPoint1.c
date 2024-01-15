@@ -45,67 +45,54 @@ int weekdayScheduleCount = 0;
 void PrintAppHeader();
 void ExecuteProgram();
 int MainMenu();
-
 void AccessMinistryMembers(); 
 void AddNewMinistryMember();
 void DeleteMinistryMember();
-
 void CheckNewRecordEqualsSignChar(char *);
 void CheckNewRecordEqualsSignInt(int);
-
 void BubbleSort();
 void YearSort();
 void GenderSort();
 void BubbleSortGender(int);
-
 void DisplayAll();
-
 int compareIndices(const void *a, const void *b);
 
 // Shared scheduling functions
 int GetSelectedMonth();
 int GetSelectedDate(int month);
-
 void AssignMonth(int, char *);
 void PrintMonth(int);
-
 int AskServerIndex(int *indexInput);
-
 void CheckServerInputZero(int *);
-
 void AssignServer(HolyMass *scheduleDatabase, int, int, int, int, int, int, int);
 void InputServers(int *, int *, int *, int *);
-
 void PrintMembersWithNumberAndNickname();
-
 void RedesignateServers(HolyMass *scheduleDatabase, int);
 void DesignateNewServers(HolyMass *scheduleDatabase, int, int, int, int, int, int *, int *, int *, int *);
-
 int isSunday(int, int, int);
 int isMonday(int, int, int);
-
 int compareSundaySchedules(const void *a, const void *b);
-
 int CheckForDaysInAMonth(int, int);
-
 void PrintCalendar(int, int);
-
 void ViewSchedule(int);
 
-
+// Sunday Scheduling Functions
 void AccessSundaysSchedules();
 void PrintSundayTimeSlot(int);
 void AddSundaySchedule();
 
+// Weekday Scheduling Functions
 void AccessWeekdaysSchedules();
 void PrintWeekdayTimeSlot(int);
 void AddWeekdaySchedule();
 
+// File Handling Functions
 void ExportMinistryMembers();
 void ImportMinistryMembers();
 void ExportSchedules(HolyMass *scheduleDatabase, int *, int);
 void ImportSchedules(HolyMass **scheduleDatabase, int *, char *);
 
+// Miscellaneous Functions
 void ClearInputBuffer();
 void FinalPrint();
 void ExitProgram(int);
@@ -137,7 +124,7 @@ int main(){
 void PrintAppHeader(){
     system("cls");
     printf("=================================================================================================\n");
-    printf("                               OUR LADY OF FATIMA PARISH\n");
+    printf("                                OUR LADY OF FATIMA PARISH\n");
     printf("                  Fatima St., Brgy. 24-C, Davao City, Philippines, 8000\n");
     printf("                           Lectors' and Commentators' Ministry\n");
     printf("                              SERVICE SCHEDULING APPLICATION\n");
@@ -216,8 +203,18 @@ void AccessMinistryMembers(){
 	// Switch case function to analyze user input and execute different functions.
     switch(choice){
         case 1: AddNewMinistryMember(); BubbleSort(); break;
-        case 2: DisplayAll(); break;
-        case 3: DeleteMinistryMember(); break;
+        case 2: 
+			if(ministryMemberCount > 0)	DisplayAll(); 
+			else{
+				printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
+			}
+			break;
+        case 3: 
+			if(ministryMemberCount > 0)	DeleteMinistryMember(); 
+			else{
+				printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
+			}
+			break;
         case 0: ExecuteProgram(); ExitProgram(0); break;
         default: break;
     } 
@@ -354,10 +351,13 @@ void AddNewMinistryMember(){
 		MinistryMembers[ministryMemberCount].MonthMembership = tempMonth;
 		MinistryMembers[ministryMemberCount].DayMembership = tempDay;
         ministryMemberCount++; // Increments total count for ministry members.
+
+        printf("\n\tA new member record has been added to the database.\n");
             
         }
+
         else    
-            printf("\t\tAction declined. Maximum amount of records acquired.");
+            printf("\t\tAction declined. Maximum amount of records acquired. Please delete a member.\n");
     
     
     printf("\n");
@@ -371,8 +371,8 @@ void DeleteMinistryMember(){
     PrintAppHeader();
     DisplayAll(); // Calls to function DisplayAll to display all curent members in database.
 
-    printf("\n\tEnter the number of the member you want to delete (0 to cancel): "); 
-    scanf("%d", &DeletedMember);
+    printf("\n\tEnter the number of the member you want to delete [0] to cancel.: "); 
+    scanf(" %d", &DeletedMember);
     ClearInputBuffer();
 	
 	// Check if the entered member number is within valid range
@@ -560,9 +560,11 @@ void DisplayAll() {
     printf("\n\t===========================================================================\n");
     printf("\t|                             MEMBER DATABASE                             |\n");
 
-    // Loop to display each member's information.
-    for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01++) {
-        // Assign the month name based on the month number.
+    if(ministryMemberCount > 0){
+    	// Loop to display each member's information.
+   		for (idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01++) {
+        
+		// Assign the month name based on the month number.
         AssignMonth(MinistryMembers[idxCtr01].MonthMembership, monthName);
 
         // Display member information in a formatted manner.
@@ -572,7 +574,15 @@ void DisplayAll() {
         printf("\t|    |  Middle Name: %-32s  | Month: %-9s |\n", MinistryMembers[idxCtr01].MiddleName, monthName);
         printf("\t|    |  Nickname: %-33s    | Day: %02d          |\n", MinistryMembers[idxCtr01].Nickname, MinistryMembers[idxCtr01].DayMembership);
         
-    }
+   		}
+	}
+	
+	else{
+		printf("\t|-------------------------------------------------------------------------|\n");
+		printf("\t|              There are no existing members in the database.             |\n");
+	}
+	
+	
 
     printf("\t===========================================================================\n\n");
 }
@@ -865,6 +875,8 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, secondServer - 1, 1);
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, thirdServer - 1 , 2);
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, fourthServer - 1, 3);
+
+        printf("\n\tA new schedule has been assigned. You may now view the schedule in the view schedule option.\n");
     }
 
     else{		//Displays this message when there are no existing members
@@ -903,6 +915,8 @@ void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, 
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *secondServer - 1, 1);
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *thirdServer - 1, 2);
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *fourthServer - 1, 3);
+
+        printf("\n\tA new schedule has been assigned. You may now view the schedule in the view schedule option.\n");
 	}
 	
 	else{		//Displays this message when there are no existing members
@@ -1063,9 +1077,14 @@ void AccessSundaysSchedules(){
 	
 	// Perform actions based on the selected option
     switch(selectedOption){
-        case 1: AddSundaySchedule(); break;
+        case 1: 
+			if(ministryMemberCount > 0) AddSundaySchedule(); 
+			else{
+					printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
+			}
+			break;
         case 2: ViewSchedule(1); break; 
-        case 0: ExecuteProgram(); break;
+        case 0: ExecuteProgram(); ExitProgram(0); break;
     }  
 }
 
@@ -1108,6 +1127,7 @@ void AddSundaySchedule(){
     
     else if(inputMonth == 0){
     	ExecuteProgram();
+    	ExitProgram(0);
 	}
     
     // This line will call the function to print a calendar that can be viewed by the user.
@@ -1125,7 +1145,8 @@ void AddSundaySchedule(){
     	}
     
     	else if(inputSunday == 0){
-    	ExecuteProgram();
+    	    ExecuteProgram();
+    	    ExitProgram(0);
 		}	
 
         else if(!isSunday(currentYear, inputMonth, inputSunday)){
@@ -1244,9 +1265,14 @@ void AccessWeekdaysSchedules(){
     
     // Perform actions based on the selected option
     switch(selectedOption){
-        case 1: AddWeekdaySchedule(); break;
+        case 1: 
+			if(ministryMemberCount > 0)	AddWeekdaySchedule(); 
+			else{
+				printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
+			}
+			break;
         case 2: ViewSchedule(0); break; 
-        case 0: ExecuteProgram(); break;
+        case 0: ExecuteProgram(); ExitProgram(0); break;
     }  
 }
 
@@ -1285,6 +1311,7 @@ void AddWeekdaySchedule(){
     
     else if(inputMonth == 0){
     	ExecuteProgram();
+    	ExitProgram(0);
 	}
     
     // This line will call the function to print a calendar that can be viewed by the user.
@@ -1296,13 +1323,14 @@ void AddWeekdaySchedule(){
         inputWeekday = GetSelectedDate(inputMonth);
 
         if(inputWeekday == -1){
-        system("cls");
-        AccessWeekdaysSchedules();
-        FinalPrint();
+            system("cls");
+            AccessWeekdaysSchedules();
+            FinalPrint();
     	}
     
     	else if(inputWeekday == 0){
-    	ExecuteProgram();
+    	    ExecuteProgram();
+    	    ExitProgram(0);
 		}
 
         else if(isSunday(currentYear, inputMonth, inputWeekday)){
@@ -1329,13 +1357,14 @@ void AddWeekdaySchedule(){
             }		
 
             else if(inputTimeSlot == -1){
-            system("cls");
-            AccessSundaysSchedules();
-            FinalPrint();
+                system("cls");
+                AccessSundaysSchedules();
+                FinalPrint();
         	}
         
         	else if(inputMonth == 0){
-        	ExecuteProgram;
+        	    ExecuteProgram();
+        	    ExitProgram(0);
     		}
     		
         }while(inputTimeSlot < -1 || inputTimeSlot > 2);
@@ -1592,27 +1621,37 @@ void FinalPrint(){
     printf("=================================================================================================\n");
 
     // If the user wants to continue, clear the screen and execute the program again.
-    if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); }
+    if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); ExitProgram(0);}
     else ExitProgram(0);
 }
 
 void ExitProgram(int errorCode){
-	PrintAppHeader();
-	printf("\n\tYou selected to exit the program.\n");
-	printf("\tThe recorded information will be stored in their respective database files.\n");
-	printf("\tThe dynamic arrays will also be freed.\n\n");
 	
-	printf("\tYou now successfully exited the program. Thank you!\n\n");
+	if (errorCode == 0){
+		PrintAppHeader();
+		printf("\n\tYou selected to exit the program.\n");
+		printf("\tThe recorded information will be stored in their respective database files.\n");
+		printf("\tThe dynamic arrays will also be freed.\n\n");
+		
+		printf("\tYou now successfully exited the program. Thank you!\n\n");
+		
+		printf("=================================================================================================");
+		BubbleSort();
+	    ExportMinistryMembers();
+	    ExportSchedules(SundaySchedules, &sundayScheduleCount, 1);
+	    ExportSchedules(WeekdaySchedules, &weekdayScheduleCount, 0);
 	
-	printf("=================================================================================================");
-	BubbleSort();
-    ExportMinistryMembers();
-    ExportSchedules(SundaySchedules, &sundayScheduleCount, 1);
-    ExportSchedules(WeekdaySchedules, &weekdayScheduleCount, 0);
-
-    free(MinistryMembers);
-    free(SundaySchedules);
-    free(WeekdaySchedules);
-
-	exit(0);
+	    free(MinistryMembers);
+	    free(SundaySchedules);
+	    free(WeekdaySchedules);
+	
+		exit(0);
+	}
+	
+	else{
+		PrintAppHeader();
+		printf("\n\tYou have encountered an unexpected error. The program will now be terminated.\n");
+		
+		exit(0);
+	}
 }
