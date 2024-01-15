@@ -3,7 +3,7 @@
         Church Lectors' and Commentators' Ministry Scheduling System
 
     Project Proponents: 
-        ARRANGUEZ, Francis Reid N.
+        ARRANGUEZ, Francis Reid N. ggggg
         CASQUEJO, Jann Dave Rhodore G.
         MORGIA, Maron Christofer E.
         RULIDA, Marvie Joyce D.
@@ -622,6 +622,7 @@ int GetSelectedMonth(){
     current_time = localtime(&t);
     int currentYear = current_time->tm_year + 1900;
 
+	//Display month options
     printf("\tMonth Options\n");
     printf("\t[1] January\t\t [5] May \t\t [9] September\n");
     printf("\t[2] February\t\t [6] June \t\t [10] October\n");
@@ -630,6 +631,7 @@ int GetSelectedMonth(){
     printf("\t[0] Go Back to Main Menu\n");
     printf("\t[-1] Return to previous section\n\n");
     
+    //Loop for the options until a valid input is entered
     do{
         printf("\tEnter the Month to be placed with a Schedule (Only for Year %d) [1 - 12]: ", currentYear);
         scanf(" %d", &input);
@@ -640,9 +642,11 @@ int GetSelectedMonth(){
     }while(input < -1 || input > 12);
 }
 
+// Function to get the selected date for scheduling within a given month
 int GetSelectedDate(int month){
     int input;
 
+	//Code for getting real time access
     time_t t;
     struct tm* current_time;
     time(&t);
@@ -651,26 +655,31 @@ int GetSelectedDate(int month){
     int currentDate = current_time->tm_mday;
     int currentMonth = current_time->tm_mon + 1;
 
+	 // Loop until a valid date is provided
     do{
         printf("\tWhich day of the Month will we schedule service? ");            
         scanf(" %d", &input);
         ClearInputBuffer();
 
-        if(input == 0)  return 0;
-
+        if(input == 0)  return 0;  //Check if user inputted 0 to go back to main menu
+		
+		//Check if user input is a past date
         else if(input < currentDate && (month <= currentMonth && input < currentDate)){
             printf("\t\tYou entered a past date. Please try again.\n\n");
         }
         
+        //Check if user input is inavlid
         else if(input < 0 || input > CheckForDaysInAMonth(month, currentYear)){
             printf("\t\tYou entered an invalid date. Please try again.\n\n");
         }
-
+		
+		//Returns the value of input when it is valid
         else return input;
     }while(input < 0 || input > CheckForDaysInAMonth(month, currentYear) || (input < currentDate && (month <= currentMonth && input < currentDate)));
    
 }
 
+// Function that assigns the name of a month
 void AssignMonth(int monthCode, char *monthName){	
 	switch (monthCode) {
 	    case 1: strcpy(monthName, "January"); break;
@@ -688,6 +697,7 @@ void AssignMonth(int monthCode, char *monthName){
     }
 }
 
+// Function that prints the name of a month
 void PrintMonth(int monthCode){	
 	switch(monthCode){
         case 1: printf("January"); break;
@@ -705,11 +715,13 @@ void PrintMonth(int monthCode){
     }
 }
 
+// Function that asks users for the member's index number
 int AskServerIndex(int *indexInput){
     scanf(" %d", indexInput);
     ClearInputBuffer();
-    CheckServerInputZero(indexInput);
-
+    CheckServerInputZero(indexInput); // Check if the user wants to go back to the main menu
+	
+	// Check if the provided index number is beyond the number of members
     if(*indexInput > ministryMemberCount){
         printf("\t\tYou provided an input beyond the number of members. Please try again.\n\n");
     }
@@ -717,6 +729,8 @@ int AskServerIndex(int *indexInput){
     else return *indexInput;
 }
 
+// Function that checks if the index entered is 0.
+// If 0 is entered, the main menu is loaded
 void CheckServerInputZero(int *serverIndex){
     if(*serverIndex == 0){
         system("cls");
@@ -725,29 +739,30 @@ void CheckServerInputZero(int *serverIndex){
     }
 }
 
+// Function that assigns a member to a specific role in the schedule
 void AssignServer(HolyMass *scheduleDatabase, int scheduleIndex, int year, int month, int date, int timeSlotIndex, int ministryMemberIndex, int servicePosition){    
-	if(ministryMemberIndex >= 0){
+	if(ministryMemberIndex >= 0){	//Check if a valid ministry member index is provided
         switch(servicePosition){
-            case 0:                
+            case 0:		//Assigns a member as the First Reader               
 				strcpy(scheduleDatabase[scheduleIndex].FirstReader, MinistryMembers[ministryMemberIndex].Nickname);
                 scheduleDatabase[scheduleIndex].isScheduled[0] = 1;                
                 break;
-            case 1:
+            case 1:		//Assigns a member as the Second Reader
 				strcpy(scheduleDatabase[scheduleIndex].SecondReader, MinistryMembers[ministryMemberIndex].Nickname);
                 scheduleDatabase[scheduleIndex].isScheduled[1] = 1; 
                 break;
-            case 2:
+            case 2:		//Assigns a member as the POF
                 strcpy(scheduleDatabase[scheduleIndex].POF, MinistryMembers[ministryMemberIndex].Nickname);
                 scheduleDatabase[scheduleIndex].isScheduled[2] = 1; 
                 break;
-            case 3:
+            case 3:		//Assigns a member as the Commentator
                 strcpy(scheduleDatabase[scheduleIndex].Commentator, MinistryMembers[ministryMemberIndex].Nickname);
                 scheduleDatabase[scheduleIndex].isScheduled[3] = 1; 
                 break;
         }
     }    
 
-    else{
+    else{			// If an invalid ministry member index is provided, assign "NONE" to the respective service position
         switch(servicePosition){
             case 0: 
                 strcpy(scheduleDatabase[scheduleIndex].FirstReader, "NONE"); 
@@ -767,15 +782,17 @@ void AssignServer(HolyMass *scheduleDatabase, int scheduleIndex, int year, int m
                 break;
         }        
     }
-    
+    // Assign other details to the specified schedule to a dynamic array
     scheduleDatabase[scheduleIndex].Year = year;
     scheduleDatabase[scheduleIndex].Month = month;
     scheduleDatabase[scheduleIndex].Date = date;
     scheduleDatabase[scheduleIndex].MassNumber = timeSlotIndex;
 }
 
+// Function that designates roles to each member
 void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverFour){
-    // Designate Servers
+    	//Do-while loops that prompts and get user inputs
+    	//Ensures that each member is assigned only once per timeslot/schedule
         do{
             printf("\t First Reader: ");
             AskServerIndex(serverOne);
@@ -809,7 +826,9 @@ void InputServers(int *serverOne, int *serverTwo, int *serverThree, int *serverF
         }while(*serverThree > ministryMemberCount || (*serverOne == *serverFour || *serverTwo == *serverFour || *serverThree == *serverFour) && *serverFour > 0);
 }
 
+// Function to redesignate servers for a specific schedule
 void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
+	// Declarations that assigns schedule details from the scheduleDatabase
     int year = scheduleDatabase[scheduleDatabaseIndex].Year;
     int month = scheduleDatabase[scheduleDatabaseIndex].Month;
     int day = scheduleDatabase[scheduleDatabaseIndex].Date;
@@ -817,7 +836,9 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
 
     int firstServer, secondServer, thirdServer, fourthServer;
     
+    // Checks if there are existing ministry members
     if(ministryMemberCount > 0){
+    	// Display information about the schedule being redesigned
         printf("\tRedesignate All Servers for "); 
 	    PrintMonth(month);
 	    printf(" %d, %d", day, year);
@@ -825,33 +846,37 @@ void RedesignateServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex){
         PrintSundayTimeSlot(timeSlot);
         printf("]\n\n");
 
+		// Prompts input instructions
         printf("\t If you wish to keep the same servers for a position, simply reinput their index number as shown above.\n");
-
         printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
 	    printf("\t\tInput [0] to go back to Access Sunday Schedules Menu.\n\n");
-
+		
+		// Prompt the user to input server indices for different roles
         InputServers(&firstServer, &secondServer, &thirdServer, &fourthServer);
 
+		// Assign redesigned servers to the specified schedule
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, firstServer - 1, 0);
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, secondServer - 1, 1);
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, thirdServer - 1 , 2);
         AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, fourthServer - 1, 3);
     }
 
-    else{
+    else{		//Displays this message when there are no existing members
 		printf("\tThere are no existing members stored in the program database. You will be redirected to the Main Menu. ");
 		ExecuteProgram();
 		ExitProgram(0);
 	}
 }
 
+// Function that designates new servers to a specific schedule
 void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, int year, int month, int day, int timeSlot, int *firstServer, int *secondServer, int *thirdServer, int *fourthServer){
-
+	
     time_t t;
     struct tm* current_time;
     time(&t);
     current_time = localtime(&t);
     
+    // Checks if there are existing members
     if(ministryMemberCount != 0){
 	    printf("\tDesignate Servers for "); 
 	    PrintMonth(month);
@@ -863,22 +888,25 @@ void DesignateNewServers(HolyMass *scheduleDatabase, int scheduleDatabaseIndex, 
 	
 	    printf("\t\tInput [-1] or any negative number if no server will be assigned.\n");
 	    printf("\t\tInput [0] to go back to Main Menu.\n\n");
-	
+		
+		// Prompt the user to input new server indices for different roles
 	    InputServers(firstServer, secondServer, thirdServer, fourthServer);
-
+		
+		// Assign redesigned servers to the specified schedule
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *firstServer - 1, 0);
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *secondServer - 1, 1);
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *thirdServer - 1, 2);
 	    AssignServer(scheduleDatabase, scheduleDatabaseIndex, year, month, day, timeSlot, *fourthServer - 1, 3);
 	}
 	
-	else{
+	else{		//Displays this message when there are no existing members
 		printf("\tThere are no existing members stored in the program database. You will be redirected to the Main Menu. ");
 		ExecuteProgram();
 		ExitProgram(0);
 	}
 }
 
+// Function that checks if the date chosen is Sunday
 int isSunday(int year, int month, int day) {
     // Create a tm structure and initialize it with the given date
     struct tm date = {0};
@@ -915,18 +943,22 @@ int isMonday(int year, int month, int day) {
     return (dayOfWeek == 1);
 }
 
+// Function to compare two HolyMass structures for sorting
 int compareSundaySchedules(const void *a, const void *b) {
     const HolyMass *scheduleA = (const HolyMass *)a;
     const HolyMass *scheduleB = (const HolyMass *)b;
-
+	
+	// Compare Year, Month, Date, and MassNumber fields
     if ((*scheduleA).Year != (*scheduleB).Year) return (*scheduleA).Year - (*scheduleB).Year;
     if ((*scheduleA).Month != (*scheduleB).Month) return (*scheduleA).Month - (*scheduleB).Month;
     if ((*scheduleA).Date != (*scheduleB).Date) return (*scheduleA).Date - (*scheduleB).Date;
     if ((*scheduleA).MassNumber != (*scheduleB).MassNumber) return (*scheduleA).MassNumber - (*scheduleB).MassNumber;
-
+	
+	// If all fields are equal, return 0 indicating both schedules are equal
     return 0;
 }
 
+// Function to check the number of days in a given month for a specified year
 int CheckForDaysInAMonth(int month, int currentYear) {
     switch (month) {
         case 4: case 6: case 9: case 11:
@@ -1004,13 +1036,15 @@ void PrintCalendar(int month, int currentYear){ // Needs More Explaining
 // Sunday Scheduling Functions
 void AccessSundaysSchedules(){
     int selectedOption;
-
+	
+	// Display program header and menu for Sunday schedules
     PrintAppHeader();
     printf("\n\tSUNDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Sunday\n");
     printf("\t\t[2] View Scheduled Sunday Servers\n");
     printf("\t\t[0] Go Back to Main Menu\n");
     
+    // Prompt the user to select an option and checks if the input is valid
     do{
         printf("\n\tWhich of the following actions would you like to do? ");
         scanf(" %d", &selectedOption);
@@ -1020,7 +1054,8 @@ void AccessSundaysSchedules(){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }           
     }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 0);
-
+	
+	// Perform actions based on the selected option
     switch(selectedOption){
         case 1: AddSundaySchedule(); break;
         case 2: ViewSchedule(1); break; 
@@ -1028,6 +1063,7 @@ void AccessSundaysSchedules(){
     }  
 }
 
+// Function that prints the time slots for Sunday Schedules
 void PrintSundayTimeSlot(int timeSlotCode){
     switch(timeSlotCode){
         case 1: printf("05:30 AM"); break;
@@ -1181,13 +1217,15 @@ void AddSundaySchedule(){
 // Weekday Scheduling Functions
 void AccessWeekdaysSchedules(){
    	int selectedOption;
-
+	
+	// Display program header and menu for weekday schedules
     PrintAppHeader();
     printf("\n\tWEEKDAY SCHEDULES\n\n");
     printf("\t\t[1] Add/Modify Server Schedules for a Specific Weekday\n");
     printf("\t\t[2] View Scheduled Weekday Servers\n");
     printf("\t\t[0] Go Back to Main Menu\n");
     
+    // Prompt the user to select an option and checks if the input is valid
     do{
         printf("\n\tWhich of the following actions would you like to do? ");
         scanf(" %d", &selectedOption);
@@ -1197,7 +1235,8 @@ void AccessWeekdaysSchedules(){
             printf("\t\tYou provided an incorrect input. Please try again.\n\n");
         }           
     }while(selectedOption != 1 && selectedOption != 2 && selectedOption != 0);
-
+    
+    // Perform actions based on the selected option
     switch(selectedOption){
         case 1: AddWeekdaySchedule(); break;
         case 2: ViewSchedule(0); break; 
@@ -1205,6 +1244,7 @@ void AccessWeekdaysSchedules(){
     }  
 }
 
+// Function that prints the time slots for Weekday Schedules
 void PrintWeekdayTimeSlot(int timeSlotCode){    
     switch(timeSlotCode){
         case 1: printf("06:00 AM"); break;
@@ -1364,34 +1404,39 @@ void ViewSchedule(int isASunday){
     int tempScheduleCount;
 
     PrintAppHeader();
-
+	
+	// Check if viewing Sunday schedules
     if(isASunday){
         printf("\tEXISTING SUNDAY SCHEDULES\n\n");            
-        qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+        qsort(SundaySchedules, sundayScheduleCount, sizeof(HolyMass), compareSundaySchedules); // Sort Sunday schedules using qsort
         
         tempScheduleCount = sundayScheduleCount;
         tempDatabase = (HolyMass *)realloc(tempDatabase, tempScheduleCount * sizeof(HolyMass));
         tempDatabase = SundaySchedules;        
     }
-
+    
+ 	// Viewing weekday schedules
     else{
         printf("\tEXISTING WEEKDAY SCHEDULES\n\n");        
-        qsort(WeekdaySchedules, weekdayScheduleCount, sizeof(HolyMass), compareSundaySchedules);
+        qsort(WeekdaySchedules, weekdayScheduleCount, sizeof(HolyMass), compareSundaySchedules); // Sort weekday schedules using qsort
         
         tempScheduleCount = weekdayScheduleCount;
         tempDatabase = (HolyMass *)realloc(tempDatabase, tempScheduleCount * sizeof(HolyMass));
         tempDatabase = WeekdaySchedules;        
     }
-
+	
+	// For loop that displays schedules
     for(idxCtr01 = 0; idxCtr01 < tempScheduleCount; idxCtr01++){
         printf("\t");
         PrintMonth(tempDatabase[idxCtr01].Month);
         printf(" %d, %d ", tempDatabase[idxCtr01].Date, tempDatabase[idxCtr01].Year);
         printf("at [");
+        // Determine whether it's a Sunday or weekday and print the appropriate time slot
             if(isSunday(tempDatabase[idxCtr01].Year, tempDatabase[idxCtr01].Month, tempDatabase[idxCtr01].Date))
                 PrintSundayTimeSlot(tempDatabase[idxCtr01].MassNumber);
             else    PrintWeekdayTimeSlot(tempDatabase[idxCtr01].MassNumber);
         printf("]\n");
+        // Display scheduled servers
         printf("\t\tFirst Reader: %s\n", tempDatabase[idxCtr01].FirstReader);
         printf("\t\tSecond Reader: %s\n", tempDatabase[idxCtr01].SecondReader);
         printf("\t\tPrayers of the Faithful: %s\n", tempDatabase[idxCtr01].POF);
@@ -1400,11 +1445,14 @@ void ViewSchedule(int isASunday){
 }
 
 // File Handling Functions
+// Function that writes the members' data to a file named "MinistryMembersDatabase.txt"
 void ExportMinistryMembers(){
     MinistryMembersDatabase = fopen("MinistryMembersDatabase.txt", "w");
     
+    // Sort Ministry Members based on index before exporting
     qsort(MinistryMembers, ministryMemberCount, sizeof(MinistryMember), compareIndices);
-
+	
+	// Looks through the sorted Ministry Members and write their data to the file
     for(idxCtr01 = 0; idxCtr01 < ministryMemberCount; idxCtr01++){
         fprintf(MinistryMembersDatabase, "%d, ", MinistryMembers[idxCtr01].Index);
         fprintf(MinistryMembersDatabase, "%s, ", MinistryMembers[idxCtr01].Surname);
@@ -1420,15 +1468,20 @@ void ExportMinistryMembers(){
     fclose(MinistryMembersDatabase);
 }
 
+// Function that reads Ministry Members' data from the file "MinistryMembersDatabase.txt" and populates the MinistryMembers array. 
 void ImportMinistryMembers(){
     idxCtr01 = 0;
-
+	
+	// Open the file for reading
 	MinistryMembersDatabase = fopen("MinistryMembersDatabase.txt", "r");
-
+	
+	// Allocate memory for the first member
     MinistryMembers = (MinistryMember *)realloc(MinistryMembers, (idxCtr01 + 1) * sizeof(MinistryMember));
 	
+	// Check if the file is opened successfully
     if(MinistryMembersDatabase == NULL)  return;
 	else{
+		// Read data from the file until the EOF is reached
 		while (fscanf(MinistryMembersDatabase, "%d, %[^,], %[^,], %[^,], %[^,], %c, %d, %d, %d\n", 
                     &MinistryMembers[idxCtr01].Index,
                     MinistryMembers[idxCtr01].Surname,
@@ -1439,24 +1492,29 @@ void ImportMinistryMembers(){
                     &MinistryMembers[idxCtr01].YearMembership,
                     &MinistryMembers[idxCtr01].MonthMembership,
                     &MinistryMembers[idxCtr01].DayMembership) != EOF) {	        	
+			// Increment the index counter and reallocate memory for the next member
 			idxCtr01++;
             MinistryMembers = (MinistryMember *)realloc(MinistryMembers, (idxCtr01 + 1) * sizeof(MinistryMember));	        	
     	}
-
-    	ministryMemberCount = idxCtr01;
-    	fclose(MinistryMembersDatabase);
+		
+    	ministryMemberCount = idxCtr01; // Update the total ministry member count
+    	fclose(MinistryMembersDatabase); // Closes the file
 	}   
 }
 
+// Function that exports schedule data
 void ExportSchedules(HolyMass *scheduleDatabase, int *scheduleCount, int isSunday){
     FILE *file;
     char *filename;
-
+	
+	// Determine the filename based on whether it's Sunday or weekday schedules
     if (isSunday) filename = "SundayScheduleDatabase.txt";
     else filename = "WeekdayScheduleDatabase.txt";
-
+	
+	// Open the file for writing
     file = fopen(filename, "w");
-
+	
+	// Write schedule data to the file
     for (idxCtr01 = 0; idxCtr01 < *scheduleCount; idxCtr01++) {
         fprintf(file, "%d, ", scheduleDatabase[idxCtr01].Year);
         fprintf(file, "%d, ", scheduleDatabase[idxCtr01].Month);
@@ -1472,17 +1530,20 @@ void ExportSchedules(HolyMass *scheduleDatabase, int *scheduleCount, int isSunda
         fprintf(file, "%s\n", scheduleDatabase[idxCtr01].Commentator);
     }
 
-    fclose(file);
+    fclose(file); //Closes the file
 }
 
+// Function that reads schedule data from a file and populates a dynamic array 
 void ImportSchedules(HolyMass **scheduleDatabase, int *scheduleCount, char *filename){
     int idxCtr01 = 0;
     FILE *file = fopen(filename, "r");
 
     if (file == NULL) return;
-
+	
+	// Allocate memory for the first structure
     *scheduleDatabase = (HolyMass *)realloc(*scheduleDatabase, (idxCtr01 + 1) * sizeof(HolyMass));
 
+	// Read data from the file until the EOF
     while (fscanf(file, "%d, %d, %d, %d, %d, %d, %d, %d, %[^,], %[^,], %[^,], %[^\n]",
                   &(*scheduleDatabase)[idxCtr01].Year,
                   &(*scheduleDatabase)[idxCtr01].Month,
@@ -1496,11 +1557,12 @@ void ImportSchedules(HolyMass **scheduleDatabase, int *scheduleCount, char *file
                   (*scheduleDatabase)[idxCtr01].SecondReader,
                   (*scheduleDatabase)[idxCtr01].POF,
                   (*scheduleDatabase)[idxCtr01].Commentator) != EOF) {
-        idxCtr01++;
+        // Increment the index and reallocate memory for the next structure
+		idxCtr01++;
         (*scheduleDatabase) = (HolyMass *)realloc((*scheduleDatabase), (idxCtr01 + 1) * sizeof(HolyMass));
     }
 
-    *scheduleCount = idxCtr01;
+    *scheduleCount = idxCtr01; // Update the schedule count and close the file
     fclose(file);
 }
 
