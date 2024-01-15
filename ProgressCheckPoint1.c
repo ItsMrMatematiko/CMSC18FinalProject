@@ -1080,7 +1080,12 @@ void AccessSundaysSchedules(){
 					printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
 			}
 			break;
-        case 2: ViewSchedule(1); break; 
+        case 2: 
+            if(weekdayScheduleCount > 0) ViewSchedule(1); 
+			else{
+				printf("\n\tYou cannot perform this action. There are no Sunday schedules in the database.");
+			}        
+            break; 
         case 0: ExecuteProgram(); ExitProgram(0); break;
     }  
 }
@@ -1269,7 +1274,13 @@ void AccessWeekdaysSchedules(){
 				printf("\n\tYou cannot perform this action. There are no ministry members in the database.");
 			}
 			break;
-        case 2: ViewSchedule(0); break; 
+        case 2: 
+            if(weekdayScheduleCount > 0) ViewSchedule(0); 
+			else{
+				printf("\n\tYou cannot perform this action. There are no Weekday schedules in the database.");
+			}        
+            break;  
+        
         case 0: ExecuteProgram(); ExitProgram(0); break;
     }  
 }
