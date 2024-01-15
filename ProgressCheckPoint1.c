@@ -48,39 +48,54 @@ char temp, toContinue;
 
 // FUNCTION PROTOTYPE DECLARATIONS
 void PrintAppHeader();
-void ClearInputBuffer();
 void ExecuteProgram();
 int MainMenu();
 void AccessMinistryMembers();
-void DeleteMinistryMember();
-void AccessWeekdaysSchedules();
-void AccessSundaysSchedules();
-void AddSundaySchedule();
-void ViewSundaySchedule();
-int CheckForDaysInAMonth(int, int);
-int isSunday(int, int, int);
-void PrintCalendar(int, int);
-void ExitProgram(int);
 void AddRecord();
-void AssignMonth(int, char*);
-void CheckNewRecordEqualsSignChar(char*);
-void CheckNewRecordEqualsSignChar2(char);
+void DeleteMinistryMember();
+void CheckNewRecordEqualsSignChar(char *);
 void CheckNewRecordEqualsSignInt(int);
-void PrintMembersWithNumberAndNickname();
-void DisplayAll();
+void CheckNewRecordEqualsSignChar2(char);
 void BubbleSort();
-void BubbleSortGender(int genderoption);
 void YearSort();
 void GenderSort();
-void ImportMinistryMembers();
-void ImportSundaySchedules();
-void CheckSundayServerInputZero(int*);
-void ExportMinistryMembers();
-void ExportSundaySchedules();
+void BubbleSortGender(int);
+void DisplayAll();
+void PrintMembersWithNumberAndNickname();
 int compareIndices(const void *a, const void *b);
+int GetSelectedMonth();
+int GetSelectedDate(int month);
+void AssignMonth(int, char *);
+void PrintMonth(int);
+int AskServerIndex(int *indexInput);
+void CheckServerInputZero(int *);
+void AssignServer(HolyMass *scheduleDatabase, int, int, int, int, int, int, int);
+void InputServers(int *, int *, int *, int *);
+void RedesignateServers(HolyMass *scheduleDatabase, int);
+void DesignateNewServers(HolyMass *scheduleDatabase, int, int, int, int, int, int *, int *, int *, int *);
+int isSunday(int, int, int);
+int isMonday(int, int, int);
 int compareSundaySchedules(const void *a, const void *b);
-void CheckServerInputZero();
-void PrintSundayTimeSlot();
+int CheckForDaysInAMonth(int, int);
+void PrintCalendar(int, int);
+void AccessSundaysSchedules();
+void PrintSundayTimeSlot(int);
+void AddSundaySchedule();
+void AccessSundaysSchedules();
+void PrintSundayTimeSlot(int);
+void DesignateNewServers(HolyMass *scheduleDatabase, int, int, int, int, int, int *, int *, int *, int *);
+void RedesignateServers(HolyMass *scheduleDatabase, int);
+void AccessWeekdaysSchedules();
+void PrintWeekdayTimeSlot(int);
+void AddWeekdaySchedule();
+void ViewSchedule(int);
+void ExportMinistryMembers();
+void ImportMinistryMembers();
+void ExportSchedules(HolyMass *scheduleDatabase, int *, int);
+void ImportSchedules(HolyMass **scheduleDatabase, int *, char *);
+void ClearInputBuffer();
+void FinalPrint();
+void ExitProgram(int);
 
 
 
@@ -133,18 +148,7 @@ void ExecuteProgram(){
     }
 
     // Check if the user wants to perform other actions.
-    printf("\tDo you wish to perform other actions in this program?.\n");
-    printf("\t\t[Y] or [y] for YES\n"); 
-    printf("\t\tAny character for NO\n"); 
-    printf("\n\t\tUser Input: ");
-    scanf(" %c", &toContinue);
-    PrintAppHeader();
-    ClearInputBuffer();	
-    printf("==========================================================================================================\n");
-
-    // If the user wants to continue, clear the screen and execute the program again.
-    if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); }
-    else ExitProgram(0);
+    FinalPrint();
 }
 
 // This function holds the main menu of the program.
@@ -229,7 +233,7 @@ void AddRecord(){
     	PrintAppHeader();
         printf("\n\t-----------------------------------------------------------------");
         printf("\n\n");
-        printf("\tIf you wish to return to the previous section please enter: [9]\n");
+        printf("\tIf you wish to return to the previous section please enter: [-1]\n");
         printf("\tIf you wish to return to the Main Menu please enter: [0]\n\n");
             
         printf("\tEnter Member's Surname: "); // User input for member surname.
@@ -270,18 +274,27 @@ void AddRecord(){
         
 		// Do-while loop to make sure that user input is only equal to m, M, f, or F.    
         do {    
-            printf("\tSex (M or F): "); // User input for member sex.
-            scanf(" %c", &tempSex);
-            
-            if (toupper(tempSex) != 'M' && toupper(tempSex) != 'F') {
-                printf("\t\tInvalid input, please choose between M or F.\n");
-            }
+    		printf("\tSex (M or F): ");
+    		scanf(" %c", &tempSex);
+    		ClearInputBuffer();
 
-            tempSex = toupper(tempSex); // Function to make sure that sex input is capitalized.
+    		// Check for special cases
+    		if (tempSex == '0') {
+    		    ExecuteProgram();
+    		    ExitProgram(0);
+    		} else if (tempSex == '-') {
+    		    AccessMinistryMembers();
+    		    FinalPrint();
+    		}
+			
+			tempSex = toupper(tempSex);
+    		
+    		if (tempSex != 'M' && tempSex != 'F') {
+    		    printf("\t\tInvalid input, please choose between M or F. Or enter -1 or 0.\n");
+    		}
 
-            CheckNewRecordEqualsSignChar2(tempSex); 
-            ClearInputBuffer();
-    	} while (tempSex != 'M' && tempSex != 'F');  
+    			
+			} while (tempSex != 'M' && tempSex != 'F'); 
         
         // Do while loop to ensure proper timeline of church
 		do {    
@@ -381,43 +394,38 @@ void DeleteMinistryMember(){
     printf("\n\t-----------------------------------------------------------------\n\n");
 }
 
- // Checks user input for 9 or 0 to either return to previous section or return to Main Menu (string variables).
+// Checks user input for '-1' or '0' to either return to the previous section or return to Main Menu (string variables).
 void CheckNewRecordEqualsSignChar(char* temp){
-	 if (strcmp(temp, "0") == 0) {
-                ExecuteProgram();
-            	ExitProgram(0);
-		}
-	else if (strcmp(temp, "9") == 0) {
-				AccessMinistryMembers();
-                ExitProgram(0);
-	}
+    if (strcmp(temp, "-1") == 0) {
+    	AccessMinistryMembers();
+    	FinalPrint();
+    }
+    else if (strcmp(temp, "0") == 0) {
+        ExecuteProgram();
+        ExitProgram(0);
+    }
 }
 
-// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (integer variables).
+// Checks user input for '-1' or '0' to either return to the previous section or return to Main Menu (integer variables).
 void CheckNewRecordEqualsSignInt(int temp){
-	 if (temp == 0) 
-	 {
-                ExecuteProgram();
-                ExitProgram(0);
-}
-	if (temp == 9)
-	{
-		AccessMinistryMembers();
-                ExitProgram(0);
-	}
+    if (temp == 0) {
+        ExecuteProgram();
+        ExitProgram(0);
+    }
+    if (temp == -1) {
+        AccessMinistryMembers();
+        FinalPrint();
+    }
 }
 
-// Checks user input for 9 or 0 to either return to previous section or return to Main Menu (character variables).
+// Checks user input for '=' or '0' to either return to the previous section or return to Main Menu (character variables).
 void CheckNewRecordEqualsSignChar2(char temp){
     if (temp == '0') {
         ExecuteProgram();
         ExitProgram(0);
     }
-    if (temp == '9') {
-        AccessMinistryMembers();
-        ExitProgram(0);
-    }
 }
+  
 
 // BubbleSort function to sort MinistryMembers array based on Surname
 void BubbleSort() {
@@ -470,8 +478,8 @@ void GenderSort(){
     printf("\n\tSort by Gender:\n");
     printf("\t\t[1] Male first\n");
     printf("\t\t[2] Female first\n");
-    printf("\t\t[9] Return to previous section\n");
-    printf("\t\t[0] Return to Main Menu\n\n");
+    printf("\t\t[0] Return to Main Menu\n");
+    printf("\t\t[-1] Return to previous section\n\n");
 
     printf("\tEnter your choice: ");
     scanf("%d", &genderoption);
@@ -481,14 +489,15 @@ void GenderSort(){
 		ExecuteProgram();
 		ExitProgram(0);
 	}
-	else if (genderoption == 9){
+	else if (genderoption == -1){
 		DisplayAll();
+		FinalPrint();
 	}
 	
-    if (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=9){
+    if (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=-1){
     	printf("\t\t\t Invalid input. Please try again");
 	}
-    }while (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=9);
+    }while (genderoption != 2 && genderoption != 1 && genderoption != 0 && genderoption !=-1);
      
         
     BubbleSortGender(genderoption);
@@ -529,26 +538,26 @@ void DisplayAll() {
         printf("\t\t[1] Default (Ascending Alphabetical Order)\n");
         printf("\t\t[2] Year Sort (Recent Members)\n");
         printf("\t\t[3] Gender Sort\n");
-        printf("\t\t[9] Return to previous section\n");
-        printf("\t\t[0] Return to Main Menu\n\n");
+        printf("\t\t[0] Return to Main Menu\n");
+        printf("\t\t[-1] Return to previous section\n\n");
 
         printf("\tInput Choice: ");
         scanf("%d", &option);
         ClearInputBuffer();
 
         // Validate user input.
-        if (option != 3 && option != 2 && option != 1 && option != 0 && option != 9)
+        if (option != 3 && option != 2 && option != 1 && option != 0 && option != -1)
             printf("\t\tInvalid input. Please try again\n");
         else
             break;
-    } while (option != 3 && option != 2 && option != 1 && option != 0 && option != 9);
+    } while (option != 3 && option != 2 && option != 1 && option != 0 && option != -1);
 
     // Perform sorting based on user's choice.
     switch (option) {
         case 1: BubbleSort(); break;
         case 2: YearSort(); break;
         case 3: GenderSort(); break;
-        case 9: AccessMinistryMembers(); ExitProgram(0);
+        case -1: AccessMinistryMembers(); FinalPrint(0);
         case 0: ExecuteProgram(); ExitProgram(0);
         default: printf("\tInvalid option\n");
     }
@@ -626,16 +635,17 @@ int GetSelectedMonth(){
     printf("\t[2] February\t\t [6] June \t\t [10] October\n");
     printf("\t[3] March\t\t [7] July \t\t [11] November\n");
     printf("\t[4] April\t\t [8] August \t\t [12] December\n");
-    printf("\t[0] Go Back to Previous Menu\n\n");
+    printf("\t[0] Go Back to Main Menu\n");
+    printf("\t[-1] Return to previous section\n\n");
     
     do{
         printf("\tEnter the Month to be placed with a Schedule (Only for Year %d) [1 - 12]: ", currentYear);
         scanf(" %d", &input);
         ClearInputBuffer();
         
-        if(input < 0 || input > 12) printf("\t\t\tYou provided an invalid input. Please try again.\n\n");
+        if(input < -1 || input > 12) printf("\t\t\tYou provided an invalid input. Please try again.\n\n");
         else return input;
-    }while(input < 0 || input > 12);
+    }while(input < -1 || input > 12);
 }
 
 int GetSelectedDate(int month){
@@ -1056,11 +1066,15 @@ void AddSundaySchedule(){
     // Only the months in year 2024 will be scheduled.
     inputMonth = GetSelectedMonth();
     
-    if(inputMonth == 0){
+    if(inputMonth == -1){
         system("cls");
         AccessSundaysSchedules();
-        ExitProgram(0);
+        FinalPrint();
     }
+    
+    else if(inputMonth == 0){
+    	ExecuteProgram();
+	}
     
     // This line will call the function to print a calendar that can be viewed by the user.
     PrintCalendar(inputMonth, currentYear);
@@ -1070,11 +1084,15 @@ void AddSundaySchedule(){
     do{
         inputSunday = GetSelectedDate(inputMonth);
 
-        if(inputSunday == 0){
-            system("cls");
-            AccessSundaysSchedules();
-            ExitProgram(0);
-        }
+        if(inputSunday == -1){
+        system("cls");
+        AccessSundaysSchedules();
+        FinalPrint();
+    	}
+    
+    	else if(inputSunday == 0){
+    	ExecuteProgram();
+		}	
 
         else if(!isSunday(currentYear, inputMonth, inputSunday)){
             printf("\t\tYou entered a date that is not a Sunday. Please try again.\n\n");
@@ -1087,7 +1105,8 @@ void AddSundaySchedule(){
     printf("\t\t[1] 05:30 AM \t\t[4] 03:00 PM\n");
     printf("\t\t[2] 07:00 AM \t\t[5] 04:30 PM\n");
     printf("\t\t[3] 08:30 AM \t\t[6] 06:00 PM\n");
-    printf("\t\t[0] Go back to Access Sunday Schedules Menu\n\n");
+    printf("\t\t[0] Go back to Main Menu\n");
+    printf("\t\t[-1] Go back to Access Sunday Schedules Menu\n\n");
 
     // This do-while loop will ask the user to select a time slot for a specific Sunday and check if it is a valid input.
     do{
@@ -1095,16 +1114,20 @@ void AddSundaySchedule(){
         scanf(" %d", &inputTimeSlot);
         ClearInputBuffer();
 
-        if(inputTimeSlot < 0 || inputTimeSlot > 6){
+        if(inputTimeSlot < -1 || inputTimeSlot > 6){
             printf("\t\t\tYou provided an invalid input. Please try again.\n");
         }		
 
-        else if(inputTimeSlot == 0){
+        else if(inputTimeSlot == -1){
             system("cls");
             AccessSundaysSchedules();
-            ExitProgram(0);
+            FinalPrint();
         }
-    }while(inputTimeSlot < 0 || inputTimeSlot > 6);
+        
+        else if(inputMonth == 0){
+        	ExecuteProgram;
+    	}
+    }while(inputTimeSlot < 1 || inputTimeSlot > 6);
     
     printf("\n-----------------------------------------------------------------------------------------------\n\n");
 
@@ -1216,11 +1239,15 @@ void AddWeekdaySchedule(){
     // Only the months in year 2024 will be scheduled.
     inputMonth = GetSelectedMonth();
     
-    if(inputMonth == 0){
+    if(inputMonth == -1){
         system("cls");
-        AccessSundaysSchedules();
-        ExitProgram(0);
+        AccessWeekdaysSchedules();
+        FinalPrint();
     }
+    
+    else if(inputMonth == 0){
+    	ExecuteProgram();
+	}
     
     // This line will call the function to print a calendar that can be viewed by the user.
     PrintCalendar(inputMonth, currentYear);
@@ -1230,11 +1257,15 @@ void AddWeekdaySchedule(){
     do{
         inputWeekday = GetSelectedDate(inputMonth);
 
-        if(inputWeekday == 0){
-            system("cls");
-            AccessSundaysSchedules();
-            ExitProgram(0);
-        }
+        if(inputWeekday == -1){
+        system("cls");
+        AccessWeekdaysSchedules();
+        FinalPrint();
+    	}
+    
+    	else if(inputWeekday == 0){
+    	ExecuteProgram();
+		}
 
         else if(isSunday(currentYear, inputMonth, inputWeekday)){
             printf("\t\tYou entered a date that falls on a Sunday. Please try again.\n\n");
@@ -1246,6 +1277,8 @@ void AddWeekdaySchedule(){
     if(!isMonday(currentYear, inputMonth, inputWeekday)){
         printf("\tPlease select a time slot for the Service Scheduling\n");
         printf("\t\t[1] 06:00 AM \t\t[2] 05:15 PM\n\n");
+        printf("\t\t[0] Go back to Main Menu\n");
+    	printf("\t\t[-1] Go back to Access Sunday Schedules Menu\n\n");
 
         // This do-while loop will ask the user to select a time slot for a specific Sunday and check if it is a valid input.
         do{
@@ -1253,16 +1286,21 @@ void AddWeekdaySchedule(){
             scanf(" %d", &inputTimeSlot);
             ClearInputBuffer();
 
-            if(inputTimeSlot < 0 || inputTimeSlot > 2){
+            if(inputTimeSlot < -1 || inputTimeSlot > 2){
                 printf("\t\t\tYou provided an invalid input. Please try again.\n");
             }		
 
-            else if(inputTimeSlot == 0){
-                system("cls");
-                AccessSundaysSchedules();
-                ExitProgram(0);
-            }
-        }while(inputTimeSlot < 0 || inputTimeSlot > 2);
+            else if(inputTimeSlot == -1){
+            system("cls");
+            AccessSundaysSchedules();
+            FinalPrint();
+        	}
+        
+        	else if(inputMonth == 0){
+        	ExecuteProgram;
+    		}
+    		
+        }while(inputTimeSlot < -1 || inputTimeSlot > 2);
     }
 
     else{        
@@ -1478,6 +1516,21 @@ void ImportSchedules(HolyMass **scheduleDatabase, int *scheduleCount, char *file
 void ClearInputBuffer(){
     int character;
     while ((character = getchar()) != '\n' && character != EOF);
+}
+
+void FinalPrint(){
+printf("\tDo you wish to perform other actions in this program?.\n");
+    printf("\t\t[Y] or [y] for YES\n"); 
+    printf("\t\tAny character for NO\n"); 
+    printf("\n\t\tUser Input: ");
+    scanf(" %c", &toContinue);
+    PrintAppHeader();
+    ClearInputBuffer();	
+    printf("==========================================================================================================\n");
+
+    // If the user wants to continue, clear the screen and execute the program again.
+    if(toContinue == 'Y' || toContinue == 'y'){ system("cls"); ExecuteProgram(); }
+    else ExitProgram(0);
 }
 
 void ExitProgram(int errorCode){
