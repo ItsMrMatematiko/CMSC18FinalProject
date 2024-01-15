@@ -3,7 +3,7 @@
         Church Lectors' and Commentators' Ministry Scheduling System
 
     Project Proponents: 
-        ARRANGUEZ, Francis Reid N. ggggg
+        ARRANGUEZ, Francis Reid N.
         CASQUEJO, Jann Dave Rhodore G.
         MORGIA, Maron Christofer E.
         RULIDA, Marvie Joyce D.
