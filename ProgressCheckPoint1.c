@@ -6,7 +6,7 @@
         ARRANGUEZ, Francis Reid N.
         CASQUEJO, Jann Dave Rhodore G.
         MORGIA, Maron Christofer E.
-        RULIDA, Marvie Joyce D.
+        RULIDA, Marvie Joyce D. 
 
     Project Completion Date: 
         15 January 2023
